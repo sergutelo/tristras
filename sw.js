@@ -1,5 +1,5 @@
 // TrisTras Service Worker — Offline Support
-const CACHE = 'tristras-v1';
+const CACHE = 'tristras-v2';
 const ASSETS = [
   './',
   './index.html',
