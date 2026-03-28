@@ -325,10 +325,14 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
       <button class="btn btn-o" onclick="showTab('log')">➕ Nuevo entreno</button>
     </div>
     <div class="stat-grid">
-      <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-val" id="s-streak">0</div><div class="stat-lbl">Días racha</div></div>
+      <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-val" id="s-streak">0</div><div class="stat-lbl">Racha actual</div></div>
       <div class="stat-card"><div class="stat-icon">🏋️</div><div class="stat-val" id="s-total">0</div><div class="stat-lbl">Sesiones totales</div></div>
       <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-val" id="s-week">0</div><div class="stat-lbl">Esta semana</div></div>
       <div class="stat-card"><div class="stat-icon">⏱️</div><div class="stat-val" id="s-mins">0</div><div class="stat-lbl">Minutos este mes</div></div>
+      <div class="stat-card"><div class="stat-icon">⌛</div><div class="stat-val" id="s-hours">0</div><div class="stat-lbl">Horas totales</div></div>
+      <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val" id="s-best-streak">0</div><div class="stat-lbl">Mejor racha</div></div>
+      <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val" id="s-consist">0%</div><div class="stat-lbl">Constancia 90d</div></div>
+      <div class="stat-card"><div class="stat-icon">🗺️</div><div class="stat-val" id="s-km">0</div><div class="stat-lbl">Km totales</div></div>
     </div>
     <div class="card">
       <h3>📈 Sesiones por semana (últimas 8)</h3>
@@ -923,6 +927,23 @@ function drawDashboard(){
     .reduce((a,s)=>a+(s.duration||0),0);
   document.getElementById('s-mins').textContent=mins;
 
+  // Horas totales
+  const totalMins = sessions.reduce((a,s)=>a+(s.duration||0),0);
+  document.getElementById('s-hours').textContent = (totalMins/60).toFixed(1);
+
+  // Mejor racha histórica
+  document.getElementById('s-best-streak').textContent = calcBestStreak(sessions);
+
+  // Constancia 90 días
+  document.getElementById('s-consist').textContent = calcConsistency(sessions) + '%';
+
+  // Km totales (programa Otro)
+  let totalKm = 0;
+  sessions.forEach(s=>{
+    if(s.program==='ot') s.exercises.forEach(ex=>ex.sets.forEach(st=>totalKm+=(parseFloat(st.reps)||0)));
+  });
+  document.getElementById('s-km').textContent = totalKm % 1 === 0 ? totalKm : totalKm.toFixed(1);
+
   drawWeekly(sessions);
   fillExSel(sessions);
   drawProgress();
@@ -940,6 +961,37 @@ function calcStreak(sessions){
     if((ref-dd)/864e5<=1){streak++;ref=dd;}else break;
   }
   return streak;
+}
+
+function calcBestStreak(sessions){
+  if(!sessions.length) return 0;
+  const dates=[...new Set(sessions.map(s=>s.date))].sort();
+  let best=1, cur=1;
+  for(let i=1;i<dates.length;i++){
+    const prev=new Date(dates[i-1]+'T00:00:00');
+    const curr=new Date(dates[i]+'T00:00:00');
+    const diff=(curr-prev)/864e5;
+    if(diff<=1){ cur++; if(cur>best) best=cur; }
+    else cur=1;
+  }
+  return best;
+}
+
+function calcConsistency(sessions){
+  // % de semanas con al menos 1 sesión en los últimos 90 días
+  const now=new Date(); now.setHours(0,0,0,0);
+  const start=new Date(now); start.setDate(now.getDate()-90);
+  let totalWeeks=0, activeWeeks=0;
+  for(let d=new Date(start);d<=now;d.setDate(d.getDate()+7)){
+    totalWeeks++;
+    const wEnd=new Date(d); wEnd.setDate(d.getDate()+6); wEnd.setHours(23,59,59,999);
+    const hasSession=sessions.some(s=>{
+      const sd=new Date(s.date+'T00:00:00');
+      return sd>=d && sd<=wEnd;
+    });
+    if(hasSession) activeWeeks++;
+  }
+  return totalWeeks ? Math.round((activeWeeks/totalWeeks)*100) : 0;
 }
 
 function getWeeks(){
