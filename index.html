@@ -41,6 +41,58 @@ body.light-theme{
   --nav-btn-hover:rgba(168,85,247,.15);
   --btn-logout-bg:#f1f5f9;
 }
+/* ── COLOR THEMES ── */
+body.theme-red{
+  --p1:#9b1c1c;--p2:#f87171;--coral:#fca5a5;--coral2:#fecaca;
+  --nav-bg:linear-gradient(135deg,#450a0a,#7f1d1d);
+}
+body.light-theme.theme-red{
+  --p1:#b91c1c;--p2:#dc2626;--coral:#ef4444;--coral2:#f87171;
+  --nav-bg:#fff1f2;
+}
+body.theme-orange{
+  --p1:#92400e;--p2:#fb923c;--coral:#fdba74;--coral2:#fed7aa;
+  --nav-bg:linear-gradient(135deg,#431407,#7c2d12);
+}
+body.light-theme.theme-orange{
+  --p1:#c2410c;--p2:#ea580c;--coral:#f97316;--coral2:#fb923c;
+  --nav-bg:#fff7ed;
+}
+body.theme-green{
+  --p1:#14532d;--p2:#4ade80;--coral:#86efac;--coral2:#bbf7d0;
+  --nav-bg:linear-gradient(135deg,#052e16,#14532d);
+}
+body.light-theme.theme-green{
+  --p1:#15803d;--p2:#16a34a;--coral:#22c55e;--coral2:#4ade80;
+  --nav-bg:#f0fdf4;
+}
+body.theme-pink{
+  --p1:#831843;--p2:#f472b6;--coral:#f9a8d4;--coral2:#fbcfe8;
+  --nav-bg:linear-gradient(135deg,#4a044e,#831843);
+}
+body.light-theme.theme-pink{
+  --p1:#be185d;--p2:#db2777;--coral:#ec4899;--coral2:#f472b6;
+  --nav-bg:#fdf2f8;
+}
+body.theme-blue{
+  --p1:#1e3a8a;--p2:#60a5fa;--coral:#93c5fd;--coral2:#bfdbfe;
+  --nav-bg:linear-gradient(135deg,#0c1445,#1e3a8a);
+}
+body.light-theme.theme-blue{
+  --p1:#1d4ed8;--p2:#2563eb;--coral:#3b82f6;--coral2:#60a5fa;
+  --nav-bg:#eff6ff;
+}
+/* color-picker chips in settings */
+.color-picker{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}
+.cpick{width:36px;height:36px;border-radius:50%;border:3px solid transparent;cursor:pointer;transition:.2s;position:relative}
+.cpick:hover{transform:scale(1.15)}
+.cpick.sel{border-color:#fff;box-shadow:0 0 0 3px var(--p2)}
+.cpick[data-c='default']{background:linear-gradient(135deg,#7c3aed,#f97316)}
+.cpick[data-c='red']{background:linear-gradient(135deg,#9b1c1c,#f87171)}
+.cpick[data-c='orange']{background:linear-gradient(135deg,#92400e,#fb923c)}
+.cpick[data-c='green']{background:linear-gradient(135deg,#14532d,#4ade80)}
+.cpick[data-c='pink']{background:linear-gradient(135deg,#831843,#f472b6)}
+.cpick[data-c='blue']{background:linear-gradient(135deg,#1e3a8a,#60a5fa)}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 .screen{display:none;min-height:100vh}
 .screen.active{display:block}
@@ -365,6 +417,17 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
           <option value="light">☀️ Claro</option>
         </select>
       </div>
+      <div class="fg">
+        <label>Color de la app</label>
+        <div class="color-picker" id="colorPicker">
+          <div class="cpick sel" data-c="default" title="Morado (por defecto)" onclick="pickColor('default')"></div>
+          <div class="cpick" data-c="red" title="Rojo" onclick="pickColor('red')"></div>
+          <div class="cpick" data-c="orange" title="Naranja" onclick="pickColor('orange')"></div>
+          <div class="cpick" data-c="green" title="Verde" onclick="pickColor('green')"></div>
+          <div class="cpick" data-c="pink" title="Rosa" onclick="pickColor('pink')"></div>
+          <div class="cpick" data-c="blue" title="Azul" onclick="pickColor('blue')"></div>
+        </div>
+      </div>
       <div class="fg"><label>Cambiar PIN (vacío = sin PIN)</label>
         <input id="sPin" type="password" placeholder="Nuevo PIN de 4 dígitos" maxlength="4" inputmode="numeric" autocomplete="new-password">
       </div>
@@ -395,8 +458,8 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
       <h3>💾 Tus datos</h3>
       <p class="sub mt4">Exporta, importa o elimina tu historial de entrenamientos.</p>
       <div class="flex mt14" style="flex-wrap:wrap;gap:8px">
-        <button class="btn btn-sec" onclick="exportData()">📤 Exportar JSON</button>
-        <button class="btn btn-sec" onclick="document.getElementById('importFile').click()">📥 Importar JSON</button>
+        <button class="btn btn-sec" onclick="exportData()">📤 Exportar registros</button>
+        <button class="btn btn-sec" onclick="document.getElementById('importFile').click()">📥 Importar registros</button>
         <button class="btn btn-red" onclick="resetData()">🗑️ Borrar mis datos</button>
       </div>
       <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
@@ -490,15 +553,41 @@ let importPending = null;
 // ═══════════════════════════════════════════════════
 // THEME
 // ═══════════════════════════════════════════════════
-function applyTheme(th){
+const COLOR_THEMES = ['red','orange','green','pink','blue'];
+
+function applyTheme(th, color){
+  // light/dark
   if(th==='light') document.body.classList.add('light-theme');
   else document.body.classList.remove('light-theme');
+  // color palette
+  COLOR_THEMES.forEach(c=>document.body.classList.remove('theme-'+c));
+  const col = color || CU?.color || 'default';
+  if(col !== 'default') document.body.classList.add('theme-'+col);
+  // sync theme-color meta (PWA top bar)
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  const colors = {default:'#7c3aed',red:'#9b1c1c',orange:'#92400e',green:'#14532d',pink:'#831843',blue:'#1e3a8a'};
+  if(metaTheme) metaTheme.content = colors[col] || colors.default;
+  // sync picker UI
+  document.querySelectorAll('.cpick').forEach(el=>{
+    el.classList.toggle('sel', el.dataset.c === col);
+  });
+}
+
+function pickColor(col){
+  applyTheme(CU?.theme||'dark', col);
+  if(CU){
+    const users=DB.users();
+    const idx=users.findIndex(u=>u.id===CU.id);
+    users[idx].color=col;
+    DB.saveUsers(users);
+    CU.color=col;
+  }
 }
 
 function toggleTheme(){
   if(!CU) return;
   const th = document.body.classList.contains('light-theme') ? 'dark' : 'light';
-  applyTheme(th);
+  applyTheme(th, CU.color||'default');
   const users=DB.users();
   const idx=users.findIndex(u=>u.id===CU.id);
   users[idx].theme=th;
@@ -590,7 +679,8 @@ function loginAs(uid){
   document.getElementById('sName').value = CU.name;
   
   const th = CU.theme || 'dark';
-  applyTheme(th);
+  const col = CU.color || 'default';
+  applyTheme(th, col);
   if(document.getElementById('sTheme')) { document.getElementById('sTheme').value = th; }
 
   initApp();
@@ -977,15 +1067,37 @@ function drawProgress(){
 }
 
 function drawPRs(sessions){
-  const prs={};
-  sessions.forEach(s=>s.exercises.forEach(ex=>
-    ex.sets.forEach(set=>{if(set.weight>0&&(!(ex.exercise in prs)||set.weight>prs[ex.exercise]))prs[ex.exercise]=set.weight;})
-  ));
-  const el=document.getElementById('prList');
-  const rows=Object.entries(prs).sort((a,b)=>b[1]-a[1]);
-  el.innerHTML=rows.length
-    ? rows.slice(0,7).map(([n,w])=>`<div class="pr-row"><span>${n}</span><span class="pr-val">🏆 ${w} kg</span></div>`).join('')
-    : '<p class="sub">Registra entrenamientos con peso para ver tus récords</p>';
+  const prsKg={};   // para ejercicios normales: máximo kg
+  const prsKm={};   // para programa Otro: máximo km
+
+  sessions.forEach(s=>{
+    const isOt = s.program === 'ot';
+    s.exercises.forEach(ex=>{
+      ex.sets.forEach(set=>{
+        if(isOt){
+          // En Otro: reps = distancia km, weight = minutos
+          const km = parseFloat(set.reps)||0;
+          if(km>0 && (!(ex.exercise in prsKm) || km > prsKm[ex.exercise]))
+            prsKm[ex.exercise] = km;
+        } else {
+          const w = parseFloat(set.weight)||0;
+          if(w>0 && (!(ex.exercise in prsKg) || w > prsKg[ex.exercise]))
+            prsKg[ex.exercise] = w;
+        }
+      });
+    });
+  });
+
+  const el = document.getElementById('prList');
+  const rowsKg = Object.entries(prsKg).sort((a,b)=>b[1]-a[1]);
+  const rowsKm = Object.entries(prsKm).sort((a,b)=>b[1]-a[1]);
+  const all = [
+    ...rowsKg.map(([n,v])=>`<div class="pr-row"><span>${n}</span><span class="pr-val">🏆 ${v} kg</span></div>`),
+    ...rowsKm.map(([n,v])=>`<div class="pr-row"><span>${n}</span><span class="pr-val">🏆 ${v} km</span></div>`)
+  ];
+  el.innerHTML = all.length
+    ? all.slice(0,7).join('')
+    : '<p class="sub">Registra entrenamientos con peso o distancia para ver tus récords</p>';
 }
 
 function drawRecent(sessions){
@@ -1108,7 +1220,7 @@ function saveSettings(){
   users[idx].theme = theme;
   DB.saveUsers(users);
   CU=users[idx];
-  applyTheme(theme);
+  applyTheme(theme, CU.color||'default');
   document.getElementById('navName').textContent=name;
   document.getElementById('navAvatar').textContent=name[0].toUpperCase();
   document.getElementById('sPin').value='';
