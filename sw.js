@@ -1,8 +1,9 @@
-// TrisTras Service Worker — Offline Support
-const CACHE = 'tristras-v8';
-const ASSETS = [
-  './',
-  './index.html',
+// TrisTras Service Worker — Offline + Auto-Update
+// ⚑  Cambia CACHE_VERSION al subir nuevos cambios → dispara notificación de actualización
+const CACHE_VERSION = 'v10';
+const CACHE = `tristras-${CACHE_VERSION}`;
+
+const STATIC_ASSETS = [
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -10,38 +11,66 @@ const ASSETS = [
   'https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js'
 ];
 
-// Install: cache all assets
+// ── INSTALL ──────────────────────────────────────────
+// Pre-cachea assets estáticos. NO llama a skipWaiting() aquí:
+// el nuevo SW espera en estado "waiting" hasta que el usuario confirme.
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(ASSETS)).then(() => self.skipWaiting())
+    caches.open(CACHE).then(cache => cache.addAll(STATIC_ASSETS))
+    // Sin skipWaiting() → el SW queda en "waiting", notificamos a la app
   );
 });
 
-// Activate: clean old caches
+// ── ACTIVATE ─────────────────────────────────────────
+// Limpia cachés viejos y toma control de todos los clientes
 self.addEventListener('activate', e => {
   e.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
+    caches.keys()
+      .then(keys => Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k))))
+      .then(() => self.clients.claim())
   );
 });
 
-// Fetch: cache-first, fall back to network
+// ── MESSAGE ──────────────────────────────────────────
+// La app envía 'SKIP_WAITING' cuando el usuario toca "Actualizar"
+self.addEventListener('message', e => {
+  if (e.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+// ── FETCH ─────────────────────────────────────────────
+// index.html → Network-first  (siempre fresco, offline usa caché)
+// resto      → Cache-first    (assets estáticos, rápido)
 self.addEventListener('fetch', e => {
-  e.respondWith(
-    caches.match(e.request).then(cached => {
-      if (cached) return cached;
-      return fetch(e.request).then(resp => {
-        // Cache new successful responses
-        if (resp && resp.status === 200 && resp.type !== 'opaque') {
-          const clone = resp.clone();
-          caches.open(CACHE).then(cache => cache.put(e.request, clone));
-        }
-        return resp;
-      }).catch(() => {
-        // If offline and not cached, return index.html as fallback
-        if (e.request.mode === 'navigate') return caches.match('./index.html');
-      });
-    })
-  );
+  const url = new URL(e.request.url);
+  const isNavigation = e.request.mode === 'navigate'
+    || url.pathname.endsWith('index.html')
+    || url.pathname === '/'
+    || url.pathname.endsWith('/');
+
+  if (isNavigation) {
+    e.respondWith(
+      fetch(e.request)
+        .then(resp => {
+          if (resp && resp.status === 200) {
+            const clone = resp.clone();
+            caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          }
+          return resp;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
+  } else {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        if (cached) return cached;
+        return fetch(e.request).then(resp => {
+          if (resp && resp.status === 200 && resp.type !== 'opaque') {
+            const clone = resp.clone();
+            caches.open(CACHE).then(cache => cache.put(e.request, clone));
+          }
+          return resp;
+        });
+      })
+    );
+  }
 });

@@ -240,6 +240,30 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 
 /* ── ANIMATIONS ── */
 @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-60px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── UPDATE TOAST ── */
+#updateToast{
+  display:none;position:fixed;top:16px;left:50%;transform:translateX(-50%);
+  z-index:9999;background:var(--card);border:1px solid var(--p2);
+  border-radius:14px;padding:14px 18px;
+  box-shadow:0 8px 32px rgba(0,0,0,.45),0 0 0 1px rgba(168,85,247,.2);
+  display:flex;align-items:center;gap:12px;min-width:280px;max-width:90vw;
+  animation:slideDown .4s cubic-bezier(.34,1.56,.64,1);
+  backdrop-filter:blur(12px);
+}
+#updateToast.hidden{display:none!important}
+.upd-icon{font-size:1.6rem;flex-shrink:0}
+.upd-text{flex:1}
+.upd-text strong{display:block;font-size:.88rem;font-weight:700;color:var(--text)}
+.upd-text span{font-size:.75rem;color:var(--muted)}
+.upd-btn{background:linear-gradient(135deg,var(--p1),var(--p2));color:#fff;
+  border:none;border-radius:8px;padding:8px 14px;font-size:.78rem;font-weight:700;
+  cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0;
+  box-shadow:0 4px 12px rgba(124,58,237,.4);transition:.2s}
+.upd-btn:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(124,58,237,.5)}
+.upd-close{background:none;border:none;color:var(--muted);cursor:pointer;
+  font-size:1.1rem;padding:4px;line-height:1;flex-shrink:0}
 
 /* ── RESPONSIVE ── */
 /* Nav superior: scroll horizontal si los botones no caben */
@@ -270,6 +294,17 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 </style>
 </head>
 <body>
+
+<!-- ══ UPDATE TOAST ══ -->
+<div id="updateToast" class="hidden" role="alert" aria-live="polite">
+  <span class="upd-icon">✨</span>
+  <div class="upd-text">
+    <strong>Nueva versión disponible</strong>
+    <span>Toca para cargar la última versión</span>
+  </div>
+  <button class="upd-btn" onclick="applyUpdate()">Actualizar</button>
+  <button class="upd-close" onclick="dismissUpdate()" title="Cerrar">✕</button>
+</div>
 
 <!-- ══════════════════ LOGIN SCREEN ══════════════════ -->
 <div id="loginScreen" class="screen active">
@@ -1466,12 +1501,66 @@ function fmtDate(d){
 // ═══════════════════════════════════════════════════
 renderChips();
 
-// Register Service Worker (PWA offline support)
+// ═══════════════════════════════════════════════════
+// PWA AUTO-UPDATE
+// ═══════════════════════════════════════════════════
+let swWaiting = null; // referencia al SW en espera
+
+function showUpdateToast(){
+  document.getElementById('updateToast').classList.remove('hidden');
+}
+
+function applyUpdate(){
+  dismissUpdate();
+  if(swWaiting){
+    swWaiting.postMessage('SKIP_WAITING'); // ordena al SW que tome el control
+  }
+}
+
+function dismissUpdate(){
+  document.getElementById('updateToast').classList.add('hidden');
+}
+
 if('serviceWorker' in navigator){
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('./sw.js')
-      .then(r => console.log('SW registrado:', r.scope))
-      .catch(e => console.warn('SW error:', e));
+    navigator.serviceWorker.register('./sw.js').then(reg => {
+      console.log('SW registrado:', reg.scope);
+
+      // ① Ya hay un SW en espera al cargar (actualización pendiente)
+      if(reg.waiting){
+        swWaiting = reg.waiting;
+        showUpdateToast();
+      }
+
+      // ② El SW pasa a "installing" → vigilamos si pasa a "waiting"
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW.addEventListener('statechange', () => {
+          if(newSW.state === 'installed' && navigator.serviceWorker.controller){
+            swWaiting = newSW;
+            showUpdateToast();
+          }
+        });
+      });
+
+      // ③ Comprobación periódica (cada 30 min) — útil si la app lleva abierta much tiempo
+      setInterval(() => {
+        if(navigator.onLine) reg.update();
+      }, 30 * 60 * 1000);
+
+      // ④ Comprobación al recuperar conexión — cubre el caso offline → online
+      window.addEventListener('online', () => {
+        console.log('Conexión recuperada, comprobando actualizaciones…');
+        reg.update();
+      });
+
+    }).catch(e => console.warn('SW error:', e));
+
+    // ⑤ Cuando el SW activo cambia (tras SKIP_WAITING) → recarga la página
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if(!refreshing){ refreshing = true; window.location.reload(); }
+    });
   });
 }
 </script>
