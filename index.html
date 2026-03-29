@@ -93,6 +93,12 @@ body.light-theme.theme-blue{
 .cpick[data-c='green']{background:linear-gradient(135deg,#14532d,#4ade80)}
 .cpick[data-c='pink']{background:linear-gradient(135deg,#831843,#f472b6)}
 .cpick[data-c='blue']{background:linear-gradient(135deg,#1e3a8a,#60a5fa)}
+/* ── CAL PERIOD PILLS ── */
+.cal-pill{padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--card2);
+  color:var(--muted);cursor:pointer;font-size:.72rem;font-weight:700;font-family:inherit;transition:.2s}
+.cal-pill:hover{border-color:var(--coral);color:var(--coral)}
+.cal-pill.act{background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border-color:transparent;
+  box-shadow:0 4px 12px rgba(249,115,22,.35)}
 body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
 .screen{display:none;min-height:100vh}
 .screen.active{display:block}
@@ -339,6 +345,19 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
       <div class="chart-wrap"><canvas id="cWeekly"></canvas></div>
     </div>
     <div class="card">
+      <div class="between mb14" style="flex-wrap:wrap;gap:10px">
+        <h3>🔥 Calorías quemadas</h3>
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="cal-pill act" data-p="week" onclick="setCalPeriod('week')">Esta semana</button>
+          <button class="cal-pill" data-p="lastweek" onclick="setCalPeriod('lastweek')">Semana pasada</button>
+          <button class="cal-pill" data-p="4weeks" onclick="setCalPeriod('4weeks')">Últimas 4 sem.</button>
+          <button class="cal-pill" data-p="12months" onclick="setCalPeriod('12months')">12 meses</button>
+        </div>
+      </div>
+      <div id="calBurnInfo" style="font-size:.78rem;color:var(--muted);margin-bottom:10px"></div>
+      <div class="chart-wrap" style="height:200px"><canvas id="cCal"></canvas></div>
+    </div>
+    <div class="card">
       <div class="between mb14">
         <h3>📉 Progreso por ejercicio</h3>
         <select id="exSel" style="width:auto;padding:7px 10px;font-size:.78rem" onchange="drawProgress()"></select>
@@ -354,13 +373,6 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
         <h3>📋 Últimas sesiones</h3>
         <div id="recentList" class="mt8"></div>
       </div>
-    </div>
-    <div class="card mt14">
-      <div class="between mb14">
-        <h3>🔥 Calorías quemadas (12 meses)</h3>
-        <div id="calBurnInfo" style="font-size:.78rem;color:var(--muted)"></div>
-      </div>
-      <div class="chart-wrap" style="height:200px"><canvas id="cCal"></canvas></div>
     </div>
   </div>
 
@@ -553,6 +565,8 @@ let cWeekly = null, cProgress = null, cCal = null;
 let pendingUID = null;
 let editingSess = null;
 let importPending = null;
+// Cache per-block exercise data while the user navigates between tabs
+let blockCache = {}; // { blockId: [{exercise, sets}] }
 
 // ═══════════════════════════════════════════════════
 // THEME
@@ -783,6 +797,8 @@ function goStep2(){
   document.getElementById('log-step2').style.display='block';
   document.getElementById('step2Title').textContent=selProg.name;
   document.getElementById('step2Sub').textContent=document.getElementById('sessSelect').value+' · '+document.getElementById('wDate').value;
+  // Reset block cache only if not editing (editing pre-populates via editingSess)
+  if(!editingSess) blockCache = {};
   selBlock=selProg.blocks[0].id;
   drawBlockTabs();
   drawExBlock();
@@ -803,7 +819,13 @@ function drawBlockTabs(){
     ).join('');
 }
 
-function switchBlock(id){selBlock=id;drawBlockTabs();drawExBlock();}
+function switchBlock(id){
+  // Persist current block data before switching
+  blockCache[selBlock] = collectCurrentBlock();
+  selBlock=id;
+  drawBlockTabs();
+  drawExBlock();
+}
 
 function drawExBlock(){
   const block=selProg.blocks.find(b=>b.id===selBlock);
@@ -811,7 +833,8 @@ function drawExBlock(){
   const container = document.getElementById('exBlocks');
   container.className = isOt ? 'ot-grid' : '';
   container.innerHTML=block.ex.map((ex,i)=>{
-    const exData = editingSess?.exercises.find(e=>e.exercise===ex);
+    // Use blockCache (pre-populated from editingSess on load, or from user input when switching tabs)
+    const exData = blockCache[selBlock]?.find(e=>e.exercise===ex);
     const setsHtml = exData ? exData.sets.map((s,si)=>mkSet(i,si,s)).join('') : mkSet(i,0);
     return `<div class="ex-row" id="er-${i}">
       <div class="ex-name">${ex}</div>
@@ -854,7 +877,8 @@ function addSet(ei){
   c.insertAdjacentHTML('beforeend',mkSet(ei,n));
 }
 
-function collectSets(){
+// Reads only the currently-rendered block from the DOM
+function collectCurrentBlock(){
   const block=selProg.blocks.find(b=>b.id===selBlock);
   const isOt = selProg.id === 'ot';
   return block.ex.map((ex,i)=>{
@@ -874,8 +898,22 @@ function collectSets(){
   }).filter(Boolean);
 }
 
+// Merges exercises from ALL blocks (cache + current DOM)
+function collectAllBlocks(){
+  // Save current block state into cache first
+  blockCache[selBlock] = collectCurrentBlock();
+  // Now merge cache from all blocks
+  const allExercises = [];
+  selProg.blocks.forEach(b=>{
+    if(blockCache[b.id]){
+      blockCache[b.id].forEach(e=>allExercises.push(e));
+    }
+  });
+  return allExercises;
+}
+
 function saveWorkout(){
-  const exs=collectSets();
+  const exs=collectAllBlocks();
   if(!exs.length){alert('Añade al menos un ejercicio con datos (reps o peso)');return;}
   const s={
     id:editingSess ? editingSess.id : 's'+Date.now(),
@@ -884,7 +922,7 @@ function saveWorkout(){
     programName:selProg.name,
     programEm:selProg.em,
     session:document.getElementById('sessSelect').value,
-    block:selBlock,
+    block:'all', // Ahora guardamos todos los bloques
     duration:parseInt(document.getElementById('wDur').value)||20,
     notes:document.getElementById('wNotes').value,
     exercises:exs
@@ -898,6 +936,7 @@ function saveWorkout(){
     d.sessions.unshift(s);
   }
   DB.saveData(CU.id,d);
+  blockCache = {}; // Limpiar cache
   document.getElementById('wNotes').value='';
   document.getElementById('wDur').value='';
   document.getElementById('logTitle').textContent='Registrar entreno';
@@ -916,8 +955,11 @@ function drawDashboard(){
   // Stats
   document.getElementById('s-total').textContent=sessions.length;
 
-  const ws=new Date(now);ws.setDate(now.getDate()-now.getDay()+1);ws.setHours(0,0,0,0);
-  document.getElementById('s-week').textContent=sessions.filter(s=>new Date(s.date)>=ws).length;
+  // Semana lunes–domingo: getDay() devuelve 0=dom,1=lun...6=sáb
+  const dayOfWeek=now.getDay(); // 0=dom
+  const diffToMonday = dayOfWeek===0 ? 6 : dayOfWeek-1; // días hacia atrás hasta el lunes
+  const ws=new Date(now);ws.setDate(now.getDate()-diffToMonday);ws.setHours(0,0,0,0);
+  document.getElementById('s-week').textContent=sessions.filter(s=>new Date(s.date+'T00:00:00')>=ws).length;
 
   document.getElementById('s-streak').textContent=calcStreak(sessions);
 
@@ -997,7 +1039,12 @@ function calcConsistency(sessions){
 function getWeeks(){
   const w=[];const now=new Date();
   for(let i=7;i>=0;i--){
-    const s=new Date(now);s.setDate(now.getDate()-i*7-now.getDay()+1);s.setHours(0,0,0,0);
+    const day=new Date(now);
+    const dow=day.getDay(); // 0=dom
+    const diffToMonday = dow===0 ? 6 : dow-1;
+    day.setDate(day.getDate()-diffToMonday-i*7);
+    day.setHours(0,0,0,0);
+    const s=new Date(day);
     const e=new Date(s);e.setDate(s.getDate()+6);e.setHours(23,59,59,999);
     const mo=s.toLocaleDateString('es-ES',{month:'short',day:'numeric'});
     w.push({s,e,label:mo});
@@ -1024,49 +1071,95 @@ function drawWeekly(sessions){
       }}});
 }
 
-function drawCalories(sessions){
-  // Get last 12 months labels and ranges
-  const months = [];
-  const now = new Date();
-  for(let i=11;i>=0;i--){
-    const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
-    months.push({
-      label: d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}),
-      y: d.getFullYear(), m: d.getMonth()
-    });
-  }
-  const calByMonth = months.map(mo=>{
-    return sessions
-      .filter(s=>{ const d=new Date(s.date+'T00:00:00'); return d.getFullYear()===mo.y && d.getMonth()===mo.m; })
-      .reduce((acc,s)=>{
-        if(s.program==='ot'){
-          s.exercises.forEach(ex=>ex.sets.forEach(st=>acc+=(st.cal||0)));
-        }
-        return acc;
-      },0);
+// Período activo de la gráfica de calorías
+let calPeriod = 'week';
+
+function setCalPeriod(p){
+  calPeriod = p;
+  // Actualizar pills
+  document.querySelectorAll('.cal-pill').forEach(el=>{
+    el.classList.toggle('act', el.dataset.p === p);
   });
-  const totalCal = calByMonth.reduce((a,b)=>a+b,0);
+  // Redibujar con los datos actuales
+  drawCalories(DB.data(CU.id).sessions||[]);
+}
+
+function drawCalories(sessions){
+  const now = new Date(); now.setHours(0,0,0,0);
+  const infoEl = document.getElementById('calBurnInfo');
   const tmb = CU.weight && CU.height && CU.age && CU.sex
     ? Math.round((10*CU.weight)+(6.25*CU.height)-(5*CU.age)+(CU.sex==='M'?5:-161))
     : null;
-  const infoEl = document.getElementById('calBurnInfo');
-  if(totalCal>0){
-    infoEl.innerHTML = `<span style="color:var(--coral);font-weight:700">${totalCal.toLocaleString()} kcal</span> quemadas en el año`
+
+  let labels = [], calData = [], chartType = 'bar';
+
+  if(calPeriod === 'week' || calPeriod === 'lastweek'){
+    // Rango: lunes–domingo de la semana actual o pasada
+    const dow = now.getDay(); // 0=dom
+    const diffToMon = dow===0 ? 6 : dow-1;
+    const monThis = new Date(now); monThis.setDate(now.getDate()-diffToMon);
+    const start = calPeriod==='week' ? monThis : new Date(monThis.getTime()-7*864e5);
+    const days = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
+    labels = days;
+    calData = days.map((_,i)=>{
+      const day = new Date(start); day.setDate(start.getDate()+i);
+      const iso = day.toISOString().split('T')[0];
+      return sessions
+        .filter(s=>s.date===iso && s.program==='ot')
+        .reduce((acc,s)=>{ s.exercises.forEach(ex=>ex.sets.forEach(st=>acc+=(st.cal||0))); return acc; },0);
+    });
+  } else if(calPeriod === '4weeks'){
+    // Rango: últimas 4 semanas completas (lunes–domingo)
+    const dow = now.getDay();
+    const diffToMon = dow===0 ? 6 : dow-1;
+    const monThis = new Date(now); monThis.setDate(now.getDate()-diffToMon);
+    labels = [];
+    calData = [];
+    for(let w=3;w>=0;w--){
+      const wStart = new Date(monThis.getTime()-w*7*864e5);
+      const wEnd   = new Date(wStart.getTime()+6*864e5); wEnd.setHours(23,59,59,999);
+      const label  = wStart.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
+      labels.push(label);
+      const kcal = sessions
+        .filter(s=>{ const d=new Date(s.date+'T00:00:00'); return d>=wStart && d<=wEnd && s.program==='ot'; })
+        .reduce((acc,s)=>{ s.exercises.forEach(ex=>ex.sets.forEach(st=>acc+=(st.cal||0))); return acc; },0);
+      calData.push(kcal);
+    }
+  } else {
+    // 12 meses
+    const months = [];
+    for(let i=11;i>=0;i--){
+      const d = new Date(now.getFullYear(), now.getMonth()-i, 1);
+      months.push({ label: d.toLocaleDateString('es-ES',{month:'short',year:'2-digit'}), y:d.getFullYear(), m:d.getMonth() });
+    }
+    labels = months.map(m=>m.label);
+    calData = months.map(mo=>{
+      return sessions
+        .filter(s=>{ const d=new Date(s.date+'T00:00:00'); return d.getFullYear()===mo.y && d.getMonth()===mo.m; })
+        .reduce((acc,s)=>{ if(s.program==='ot') s.exercises.forEach(ex=>ex.sets.forEach(st=>acc+=(st.cal||0))); return acc; },0);
+    });
+  }
+
+  const total = calData.reduce((a,b)=>a+b,0);
+  const periodLabel = {week:'esta semana',lastweek:'la semana pasada','4weeks':'las últimas 4 semanas','12months':'los últimos 12 meses'}[calPeriod];
+  if(total>0){
+    infoEl.innerHTML = `<span style="color:var(--coral);font-weight:700">${total.toLocaleString()} kcal</span> quemadas en ${periodLabel}`
       + (tmb ? ` &nbsp;·&nbsp; <span style="color:var(--green)">TMB: ${tmb} kcal/día</span>` : '');
   } else {
-    infoEl.textContent = tmb ? `TMB: ${tmb} kcal/día` : 'Registra actividades en Otro para ver calorías';
+    infoEl.textContent = tmb ? `TMB: ${tmb} kcal/día` : 'Sin calorías registradas en el período seleccionado';
   }
+
   const ctx = document.getElementById('cCal');
   if(cCal) cCal.destroy();
   cCal = new Chart(ctx,{type:'bar',
     data:{
-      labels: months.map(m=>m.label),
+      labels,
       datasets:[{
         label:'Kcal quemadas',
-        data: calByMonth,
-        backgroundColor: calByMonth.map(v=>v>0?'rgba(249,115,22,.8)':'rgba(249,115,22,.15)'),
+        data: calData,
+        backgroundColor: calData.map(v=>v>0?'rgba(249,115,22,.85)':'rgba(249,115,22,.12)'),
         borderColor:'#f97316',
-        borderWidth:2, borderRadius:6, borderSkipped:false
+        borderWidth:2, borderRadius:8, borderSkipped:false
       }]
     },
     options:{responsive:true,maintainAspectRatio:false,
@@ -1211,15 +1304,27 @@ function editSess(id){
   if(!sess) return;
   editingSess = sess;
   selProg = PROGS.find(p=>p.id===sess.program) || PROGS[0];
-  selBlock = sess.block;
-  
+
+  // Pre-populate blockCache from saved exercises, grouped by block
+  blockCache = {};
+  selProg.blocks.forEach(b=>{
+    const exsInBlock = sess.exercises.filter(e=>{
+      // Find which block this exercise belongs to
+      return b.ex.includes(e.exercise);
+    });
+    if(exsInBlock.length) blockCache[b.id] = exsInBlock;
+  });
+
+  // Start on first block (or previous block if stored)
+  selBlock = selProg.blocks[0].id;
+
   showTab('log');
   buildProgGrid();
   document.getElementById('sessSelect').value = sess.session;
   document.getElementById('wDate').value = sess.date;
   document.getElementById('wDur').value = sess.duration || '';
   document.getElementById('wNotes').value = sess.notes || '';
-  
+
   document.getElementById('logTitle').textContent = 'Editar entreno';
   document.getElementById('btnCancelEdit').style.display = 'block';
   goStep1();
@@ -1227,6 +1332,7 @@ function editSess(id){
 
 function cancelEdit(){
   editingSess = null;
+  blockCache = {};
   document.getElementById('logTitle').textContent = 'Registrar entreno';
   document.getElementById('btnCancelEdit').style.display = 'none';
   document.getElementById('wNotes').value = '';
