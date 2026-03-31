@@ -1384,7 +1384,7 @@ function drawCalories(sessions){
     labels = days;
     calData = days.map((_,i)=>{
       const day = new Date(start); day.setDate(start.getDate()+i);
-      const iso = day.toISOString().split('T')[0];
+      const iso = day.getFullYear() + '-' + (day.getMonth()+1).toString().padStart(2,'0') + '-' + day.getDate().toString().padStart(2,'0');
       return sessions
         .filter(s=>s.date===iso && s.program==='ot')
         .reduce((acc,s)=>{ s.exercises.forEach(ex=>ex.sets.forEach(st=>acc+=(st.cal||0))); return acc; },0);
