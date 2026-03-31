@@ -668,37 +668,124 @@ const DB = {
 // EXERCISE CATALOG
 // ═══════════════════════════════════════════════════
 const PROGS = [
-  {id:'t40',em:'🌟',name:'TRIS TRAS 40+',desc:'15 min/día · Principiante (40+)',
-   sessions:['Sesión A','Sesión B'],
+  {id:'tt1a', em:'🦄', name:'1A - NIVEL UNICORNIO', desc:'Iniciación · Principiantes',
+   sessions:['Única'],
    blocks:[
-    {id:'f',name:'💪 Fuerza',ex:['Sentadillas','Zancadas cortas','Extensión de tríceps, el latigazo','Aperturas de hombros, el bostezo','Remo con banda','Curl de bíceps']},
-    {id:'g',name:'🍑 Glúteo',ex:['Puente de glúteo','Patada de glúteo','Abducción de cadera, la almeja','Sentadilla sumo']},
-    {id:'c',name:'❤️ Cardio',ex:['Marcha en sitio','Stepping lateral','Elevación de rodillas','Círculos de brazos']}
+    {id:'ex', name:'💪 Sesión 1A', ex:[
+      'Media sentadilla. "El pantalón vaquero"',
+      'Curl de bíceps con banda elástica. "La camiseta blanca"',
+      'Zancada adelante y rodilla al suelo. "Las converse"',
+      'Press de pecho con banda elástica. "El Mazinger Z"',
+      'Puente de glúteos sin banda. "Las Kardashian"',
+      'Remo con banda elástica sentado en el suelo'
+    ]}
    ]},
-  {id:'st',em:'⚡',name:'SUPER TRAS',desc:'Core potente · Todos los niveles',
-   sessions:['Semana 1-2','Semana 3-4','Semana 5-6'],
+  {id:'tt1b', em:'🦄', name:'1B - NIVEL UNICORNIO', desc:'Iniciación · Principiantes',
+   sessions:['Única'],
    blocks:[
-    {id:'c',name:'🔥 Core',ex:['Plancha frontal','Plancha lateral','Crunch bicicleta','Dead bug','Russian twist','Hollow hold','Ab rollout']},
-    {id:'h',name:'💥 HIIT',ex:['Mountain climbers','Burpees','Saltos de cuerda','High knees','Jump squats']}
+    {id:'ex', name:'💪 Sesión 1B', ex:[
+      'Media sentadilla. "El pantalón vaquero"',
+      'Curl de bíceps con banda elástica. "La camiseta blanca"',
+      'Zancada adelante y rodilla al suelo. "Las converse"',
+      'Extensión de tríceps de pie con banda elástica. "El latigazo"',
+      'Abducción de cadera con mini banda. "La almeja"',
+      'Aperturas de hombros con banda elástica agarre prono. "El bostezo"'
+    ]}
    ]},
-  {id:'cc',em:'🍑',name:'CU CU TRAS',desc:'Glúteos y piernas · Multilevels',
-   sessions:['Unicornio 🦄','Minions','Naranjito 🍊','Cinturón Negro 🥋'],
+  {id:'tt2a', em:'🟡', name:'2A - NIVEL AMARILLO', desc:'Intermedio inicial',
+   sessions:['Única'],
    blocks:[
-    {id:'g',name:'🍑 Glúteos',ex:['Puente de glúteo','Hip thrust','Patada de glúteo','Abducción tumbada','Clamshell','Kickback']},
-    {id:'p',name:'🦵 Piernas',ex:['Sentadillas','Zancadas','Step up','Peso muerto rumano','Sentadilla búlgara','Prensa (silla)']},
-    {id:'c',name:'❤️ Cardio',ex:['Jumping jacks','Saltos laterales','Skipping','Sprint en sitio','Box jump']}
+    {id:'ex', name:'💪 Sesión 2A', ex:[
+      'Media sentadilla. "Pantalón vaquero"',
+      'Curl de bíceps con banda elástica. "Camiseta blanca"',
+      'Puente de glúteos con mini banda elástica. "Kardashian con goma"',
+      'Extensión de cadera con banda elástica. "Coz de pie"',
+      'Zancadas laterales con banda elástica. "El Godzilla"',
+      'Jalón dorsal con banda elástica. "La aspiradora"',
+      'Puente con extensión de rodilla'
+    ]}
    ]},
-  {id:'fu',em:'🔥',name:'TRIS TRAS FUEGUITO',desc:'20 min · Avanzado · Pesas',
-   sessions:['Sesión A','Sesión B','Sesión C'],
+  {id:'tt2b', em:'🟡', name:'2B - NIVEL AMARILLO', desc:'Intermedio inicial',
+   sessions:['Única'],
    blocks:[
-    {id:'f',name:'💪 Fuerza',ex:['Sentadilla con mancuerna','Press banca','Peso muerto','Remo con mancuerna','Press militar','Dominadas']},
-    {id:'c',name:'⚡ Core',ex:['Plancha con toque hombro','Ab wheel','L-sit','Dragon flag','Hanging knee raise']},
-    {id:'h',name:'🔥 Fuego HIIT',ex:['Burpees','Box jumps','Kettlebell swing','Sprints','Battle ropes','Thruster']}
+    {id:'ex', name:'💪 Sesión 2B', ex:[
+      'Media sentadilla. "Pantalón vaquero"',
+      'Extensión de tríceps de pie con banda elástica. "El latigazo"',
+      'Puente de glúteos con mini banda elástica. "Kardashian con gomas"',
+      'Flexiones de brazos con rodillas apoyadas. "Flexión con barreños"',
+      'Rotación externa de hombros con banda elástica. "Maldito rotador"',
+      'Patada de glúteo con banda elástica. "Coz del borriquito"',
+      'Curl de bíceps concentrado con banda elástica sentado en silla. "El presidiario"'
+    ]}
    ]},
-  {id:'ot',em:'🏃',name:'OTRO',desc:'Otras actividades físicas',
+  {id:'tt3a', em:'🟠', name:'3A - NIVEL NARANJA', desc:'Intermedio avanzado',
+   sessions:['Única'],
+   blocks:[
+    {id:'ex', name:'💪 Sesión 3A', ex:[
+      'Media sentadilla con goma o peso. "El Pantalón Vaquero"',
+      'Extensión de tríceps de pie con banda elástica. "El latigazo"',
+      'Zancada adelante y rodilla al suelo (con peso). "Las Converse con peso"',
+      'Curl de bíceps con banda elástica. "La camiseta blanca"',
+      'Desplazamiento lateral con banda elástica. "Pachín, pachín, los patitos"',
+      'Extensión tríceps sentado (con peso). "Latigazo con garrafa"',
+      'Patada de glúteo con banda elástica. "La coz del borriquito"',
+      'Under switch animal flow. "El matrix"'
+    ]}
+   ]},
+  {id:'tt3b', em:'🟠', name:'3B - NIVEL NARANJA', desc:'Intermedio avanzado',
+   sessions:['Única'],
+   blocks:[
+    {id:'ex', name:'💪 Sesión 3B', ex:[
+      'Media sentadilla con goma o peso. "El Pantalón Vaquero"',
+      'Extensión de tríceps de pie con banda elástica. "El latigazo"',
+      'Zancada adelante y rodilla al suelo (con peso). "Las Converse con peso"',
+      'Curl de bíceps con banda elástica. "La camiseta blanca"',
+      'Muñecas de famosa (2x)',
+      'Abducción de cadera con banda elástica y piernas abiertas. "La almeja de pie"',
+      'Aperturas de hombros con banda elástica de pie (elevaciones laterales). "El playmobil de pie"',
+      'Peso muerto con goma. "Paquito el chocolatero"'
+    ]}
+   ]},
+  {id:'tt4a', em:'⚫', name:'4A - NIVEL NEGRO', desc:'Avanzado · Alta intensidad',
+   sessions:['Única'],
+   blocks:[
+    {id:'ex', name:'💪 Sesión 4A', ex:[
+      'Media sentadilla con Peso. "Pantalón vaquero"',
+      'Flexiones de brazos con rodillas apoyadas. "Flexión con barreños"',
+      'Peso muerto con goma. "Paquito el chocolatero"',
+      'Curl de bíceps con banda elástica. "Camiseta blanca"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas del oxígeno"',
+      'Puente de glúteos con elevación de una pierna. "Kardashian-cabaret"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas del oxígeno"',
+      'Reverse Pec Deck. "Cu-cú...!TRAS!"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas del oxígeno"',
+      'Zancada lateral con deslizador (slider) "La mopa"'
+    ]}
+   ]},
+  {id:'tt4b', em:'⚫', name:'4B - NIVEL NEGRO', desc:'Avanzado · Alta intensidad',
+   sessions:['Única'],
+   blocks:[
+    {id:'ex', name:'💪 Sesión 4B', ex:[
+      'Media sentadilla con Peso. "El pantalón vaquero con goma"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"',
+      'Plancha horizontal isométrica. "La plancha"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"',
+      'Curl de bíceps con banda elástica. "La camiseta blanca"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"',
+      'Flexiones de brazos con rodillas apoyadas. "Flexiones con barreños"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"',
+      'Jalón con Goma "Superman"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"',
+      'Desplazamiento lateral en plancha con banda de resistencia "La plancha en marcha"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"',
+      'Press de hombro con goma sentado. "La maleta"',
+      'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas oxígeno"'
+    ]}
+   ]},
+  {id:'ot', em:'🏃', name:'OTRO', desc:'Otras actividades físicas',
    sessions:['Único'],
    blocks:[
-    {id:'o',name:'🏃 Actividad',ex:['Correr','Caminar','Bici','Natación','Yoga','Pilates','Otro']}
+    {id:'o', name:'🏃 Actividad', ex:['Correr','Caminar','Bici','Natación','Yoga','Pilates','Otro']}
    ]}
 ];
 
