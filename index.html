@@ -259,10 +259,17 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
   position: relative;
 }
 .hm-day.train {
-  background: linear-gradient(135deg, var(--p1), var(--p2));
+  background: var(--p1);
   color: #fff;
   border-color: transparent;
-  box-shadow: 0 4px 10px rgba(124,58,237,.25);
+  opacity: 0.4;
+}
+.hm-day.train.lv2 { opacity: 0.65; }
+.hm-day.train.lv3 { opacity: 0.85; }
+.hm-day.train.lv4 { 
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  opacity: 1;
+  box-shadow: 0 4px 12px rgba(124,58,237,.3);
 }
 .hm-day.today {
   border: 2px solid var(--coral);
@@ -1289,27 +1296,38 @@ function drawMonthlyHeatmap(allSessions, now){
 
   const daysInMonth = new Date(curY, curM + 1, 0).getDate();
   
-  // Filtramos solo las sesiones del mes actual para el heatmap
-  const sessionsThisMonth = allSessions.filter(s => {
-    const d = new Date(s.date + 'T00:00:00');
-    return d.getMonth() === curM && d.getFullYear() === curY;
+  // Contamos total de ejercicios por cada día del mes actual
+  const exByDay = {}; // { day: totalExCount }
+  allSessions.forEach(s => {
+    const dObj = new Date(s.date + 'T00:00:00');
+    if(dObj.getMonth() === curM && dObj.getFullYear() === curY){
+      const dNum = parseInt(s.date.split('-')[2]);
+      exByDay[dNum] = (exByDay[dNum] || 0) + s.exercises.length;
+    }
   });
-  const trainedDays = new Set(sessionsThisMonth.map(s => parseInt(s.date.split('-')[2])));
-  const today = now.getDate();
 
+  const today = now.getDate();
   let html = '';
-  // Añadir espacios vacíos para alinear el primer día de la semana (Lunes=1, ..., Domingo=0)
+  // Añadir espacios vacíos para alinear el primer día de la semana
   const firstDay = new Date(curY, curM, 1).getDay();
   const offset = firstDay === 0 ? 6 : firstDay - 1; 
 
   for(let i=0; i<offset; i++) html += '<div style="opacity:0"></div>';
   
   for(let d=1; d<=daysInMonth; d++){
-    const isTrained = trainedDays.has(d);
+    const count = exByDay[d] || 0;
     const isToday = d === today;
-    html += `<div class="hm-day${isTrained?' train':''}${isToday?' today':''}">
+    let lv = '';
+    if(count > 0){
+      if(count <= 6) lv = 'lv1';
+      else if(count <= 11) lv = 'lv2';
+      else if(count <= 16) lv = 'lv3';
+      else lv = 'lv4';
+    }
+
+    html += `<div class="hm-day${count>0?' train '+lv:''}${isToday?' today':''}">
       ${d}
-      ${isTrained?'<div class="dot"></div>':''}
+      ${count>0?'<div class="dot"></div>':''}
     </div>`;
   }
   grid.innerHTML = html;
