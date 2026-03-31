@@ -112,7 +112,7 @@ body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-h
 .login-logo .logo-icon{font-size:3.5rem;line-height:1;margin-bottom:12px}
 .login-logo h1{font-size:2.2rem;font-weight:800;
   background:linear-gradient(135deg,var(--p2),var(--coral));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .login-logo p{color:var(--muted);font-size:.9rem;margin-top:6px}
 .user-chips{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}
 .chip{background:var(--card2);border:2px solid var(--border);border-radius:20px;
@@ -125,7 +125,7 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
   border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100}
 .logo-nav{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.15rem;
   background:linear-gradient(135deg,var(--p2),var(--coral));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent}
+  background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent}
 .nav-tabs{display:flex;gap:4px}
 .ntab{background:var(--nav-btn-bg);border:none;color:var(--nav-text);padding:8px 16px;
   border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;transition:.2s;font-family:inherit}
@@ -183,7 +183,7 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 .stat-icon{font-size:1.8rem;line-height:1;margin-bottom:8px}
 .stat-val{font-size:2.2rem;font-weight:800;
   background:linear-gradient(135deg,var(--p2),var(--coral));
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+  background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
 .stat-lbl{font-size:.72rem;color:var(--muted);margin-top:5px;font-weight:500;text-transform:uppercase;letter-spacing:.5px}
 
 /* ── PROGRAM CARDS ── */
@@ -236,6 +236,71 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 /* ── EMPTY STATE ── */
 .empty{text-align:center;padding:50px 20px;color:var(--muted)}
 .empty-icon{font-size:3.5rem;margin-bottom:14px}
+/* ── HEATMAP ── */
+.hm-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+.hm-day {
+  aspect-ratio: 1;
+  background: var(--card2);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  transition: .2s;
+  position: relative;
+}
+.hm-day.train {
+  background: linear-gradient(135deg, var(--p1), var(--p2));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 10px rgba(124,58,237,.25);
+}
+.hm-day.today {
+  border: 2px solid var(--coral);
+}
+.hm-day .dot {
+  width: 4px;
+  height: 4px;
+  background: #fff;
+  border-radius: 50%;
+  margin-top: 2px;
+}
+
+/* ── TIMER PANEL ── */
+.timer-panel {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  background: var(--card);
+  border: 1px solid var(--p2);
+  padding: 12px 18px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+  position: sticky;
+  top: 75px;
+  z-index: 90;
+  backdrop-filter: blur(8px);
+}
+.t-stopwatch { flex: 1; }
+#swDisplay { font-size: 1.3rem; font-weight: 800; font-family: monospace; color: var(--p2); }
+.t-divider { width: 1px; height: 40px; background: var(--border); }
+.t-rest { flex: 1.2; text-align: right; }
+.rest-val { font-size: 1.3rem; font-weight: 800; color: var(--coral); font-family: monospace; }
+.t-btn { background: var(--card2); border: 1px solid var(--border); color: var(--text); 
+  padding: 4px 8px; border-radius: 6px; cursor: pointer; font-size: 0.65rem; font-weight: 700; transition: .2s; }
+.t-btn:hover { border-color: var(--coral); color: var(--coral); }
+.t-rest .flex { justify-content: flex-end; margin-bottom: 4px; }
+
 .divider{border:none;border-top:1px solid var(--border);margin:18px 0}
 
 /* ── ANIMATIONS ── */
@@ -312,7 +377,7 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
     <div class="login-logo">
       <div class="logo-icon">💪</div>
       <h1>TrisTras Tracker</h1>
-      <p>Registro de entrenamientos · Cuerpos Serranos</p>
+      <p>Registro de entrenos para Cuerpos Serranos</p>
       <p style="margin-top:6px;font-size:.7rem;color:var(--muted);opacity:.6">v1.1</p>
     </div>
     <div id="lm-select">
@@ -353,6 +418,7 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
       <button class="ntab" id="nt-settings" onclick="showTab('settings')">⚙️ Ajustes</button>
     </div>
     <div class="nav-right">
+      <div id="navTimer" style="display:none;font-size:.8rem;font-weight:800;color:var(--p2);background:var(--nav-btn-bg);padding:4px 10px;border-radius:12px;margin-right:8px;font-family:monospace;border:1px solid rgba(168,85,247,.3)">00:00:00</div>
       <button class="ntab" onclick="toggleTheme()" id="btn-theme-toggle" style="padding:4px 8px;font-size:1rem;background:transparent">🌓</button>
       <div class="avatar" id="navAvatar"></div>
       <span id="navName"></span>
@@ -365,6 +431,13 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
     <div class="between mb14">
       <div><h2>Dashboard</h2><p id="greeting" class="sub"></p></div>
       <button class="btn btn-o" onclick="showTab('log')">➕ Nuevo entreno</button>
+    </div>
+    <div class="card" id="heatmapCard">
+      <div class="between mb8">
+        <h3>📅 Actividad mensual</h3>
+        <span class="sub" id="hmMonth">Marzo 2026</span>
+      </div>
+      <div id="hmGrid" class="hm-grid"></div>
     </div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-val" id="s-streak">0</div><div class="stat-lbl">Racha actual</div></div>
@@ -438,6 +511,31 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
         <div><h3 id="step2Title"></h3><p class="sub" id="step2Sub"></p></div>
         <button class="btn btn-sec btn-sm" onclick="goStep1()">← Volver</button>
       </div>
+
+      <!-- ⏱️ TIMER PANEL (Floating) -->
+      <div id="timerPanel" class="timer-panel" style="display:none">
+        <div class="t-stopwatch">
+          <div class="between" style="gap:5px">
+            <span class="sub">SESIÓN</span>
+            <div class="flex" style="gap:4px">
+              <button id="btnSwToggle" class="t-btn" style="min-width:32px" onclick="toggleStopwatch()">▶️</button>
+              <button class="t-btn" style="min-width:32px" onclick="resetStopwatch()">⏹️</button>
+            </div>
+          </div>
+          <div id="swDisplay">00:00:00</div>
+        </div>
+        <div class="t-divider"></div>
+        <div class="t-rest">
+          <span class="sub">DESCANSO</span>
+          <div class="flex" style="gap:5px">
+            <button class="t-btn" onclick="startRest(30)">30s</button>
+            <button class="t-btn" onclick="startRest(60)">60s</button>
+            <button class="t-btn" onclick="startRest(90)">90s</button>
+          </div>
+          <div id="restDisplay" class="rest-val">00s</div>
+        </div>
+      </div>
+
       <div class="btabs" id="blockTabs"></div>
       <div id="exBlocks"></div>
       <div class="mt14">
@@ -483,7 +581,14 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
       <div class="fg"><label>Cambiar PIN (vacío = sin PIN)</label>
         <input id="sPin" type="password" placeholder="Nuevo PIN de 4 dígitos" maxlength="4" inputmode="numeric" autocomplete="new-password">
       </div>
-      <button class="btn btn-p" onclick="saveSettings()">Guardar cambios</button>
+      <div class="fg" style="display:flex;align-items:center;justify-content:space-between;background:var(--card2);padding:12px;border-radius:10px;border:1px solid var(--border)">
+        <div>
+          <h3 style="font-size:.85rem">⏱️ Cronómetro y Descanso</h3>
+          <p class="sub" style="font-size:.7rem">Mostrar herramientas de tiempo al entrenar</p>
+        </div>
+        <input type="checkbox" id="sShowTimers" style="width:24px;height:24px;cursor:pointer">
+      </div>
+      <button class="btn btn-p mt14" onclick="saveSettings()">Guardar cambios</button>
     </div>
 
     <div class="card">
@@ -736,6 +841,7 @@ function loginAs(uid){
   const col = CU.color || 'default';
   applyTheme(th, col);
   if(document.getElementById('sTheme')) { document.getElementById('sTheme').value = th; }
+  if(document.getElementById('sShowTimers')) { document.getElementById('sShowTimers').checked = !!CU.showTimers; }
 
   initApp();
 
@@ -784,6 +890,7 @@ function showTab(t){
     document.getElementById('sAge').value=CU.age||'';
     document.getElementById('sHeight').value=CU.height||'';
     document.getElementById('sWeight').value=CU.weight||'';
+    document.getElementById('sShowTimers').checked=!!CU.showTimers;
     updateHealthUI();
   }
 }
@@ -791,10 +898,14 @@ function showTab(t){
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
-function initApp(){
+function updateGreeting(){
   const h=new Date().getHours();
-  document.getElementById('greeting').textContent =
-    h<12?'¡Buenos días! 🌅':h<18?'¡Buenas tardes! ☀️':'¡Buenas noches! 🌙';
+  document.getElementById('greeting').textContent = 
+    h<12 ? '¡Buenos días! 🌅' : h<21 ? '¡Buenas tardes! ☀️' : '¡Buenas noches! 🌙';
+}
+
+function initApp(){
+  updateGreeting();
   document.getElementById('wDate').value = new Date().toISOString().split('T')[0];
   buildProgGrid();
   showTab('dashboard');
@@ -838,6 +949,15 @@ function goStep2(){
   selBlock=selProg.blocks[0].id;
   drawBlockTabs();
   drawExBlock();
+  
+  // Timer Management
+  if(CU.showTimers){
+    document.getElementById('timerPanel').style.display='flex';
+    // No empezamos solo; mostramos el panel en reposo
+    updateSWDisplay();
+  } else {
+    document.getElementById('timerPanel').style.display='none';
+  }
 }
 
 function goStep1(){
@@ -972,6 +1092,7 @@ function saveWorkout(){
     d.sessions.unshift(s);
   }
   DB.saveData(CU.id,d);
+  stopStopwatch();
   blockCache = {}; // Limpiar cache
   document.getElementById('wNotes').value='';
   document.getElementById('wDur').value='';
@@ -981,12 +1102,84 @@ function saveWorkout(){
   showTab('dashboard');
 }
 
+// ⏱️ TIMER LOGIC
+let swInt = null, swSeconds = 0, isSwPaused = true;
+let restInt = null, restSeconds = 0;
+
+function toggleStopwatch(){
+  if(isSwPaused) startStopwatch();
+  else pauseStopwatch();
+}
+
+function startStopwatch(){
+  if(!isSwPaused) return;
+  isSwPaused = false;
+  document.getElementById('navTimer').style.display = 'block';
+  document.getElementById('btnSwToggle').textContent = '⏸️';
+  swInt = setInterval(()=>{
+    swSeconds++;
+    updateSWDisplay();
+    // Auto-update duration input in Step 1 (minutes)
+    const mins = Math.floor(swSeconds/60);
+    if(mins > 0) document.getElementById('wDur').value = mins;
+  }, 1000);
+}
+
+function pauseStopwatch(){
+  isSwPaused = true;
+  clearInterval(swInt); swInt = null;
+  document.getElementById('btnSwToggle').textContent = '▶️';
+}
+
+function resetStopwatch(){
+  if(confirm('¿Deseas reiniciar el cronómetro?')){
+    pauseStopwatch();
+    swSeconds = 0;
+    updateSWDisplay();
+    document.getElementById('navTimer').style.display = 'none';
+  }
+}
+
+function stopStopwatch(){
+  pauseStopwatch();
+  document.getElementById('navTimer').style.display = 'none';
+}
+
+function updateSWDisplay(){
+  const h=Math.floor(swSeconds/3600), m=Math.floor((swSeconds%3600)/60), s=swSeconds%60;
+  const timeStr = `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+  document.getElementById('swDisplay').textContent = timeStr;
+  document.getElementById('navTimer').textContent = timeStr;
+}
+
+function startRest(sec){
+  clearInterval(restInt);
+  restSeconds = sec;
+  updateRestDisplay();
+  restInt = setInterval(()=>{
+    restSeconds--;
+    updateRestDisplay();
+    if(restSeconds<=0){
+      clearInterval(restInt); restInt=null;
+      if('vibrate' in navigator) navigator.vibrate([200, 100, 200]);
+    }
+  }, 1000);
+}
+
+function updateRestDisplay(){
+  document.getElementById('restDisplay').textContent = restSeconds + 's';
+}
+
 // ═══════════════════════════════════════════════════
 // DASHBOARD
 // ═══════════════════════════════════════════════════
 function drawDashboard(){
-  const {sessions=[]}=DB.data(CU.id);
-  const now=new Date();
+  updateGreeting();
+  const {sessions=[]} = DB.data(CU.id);
+  const now = new Date();
+
+  // 🗓️ Dibujar Heatmap Mensual (solo mostramos el mes actual, pero conservamos todos los datos)
+  drawMonthlyHeatmap(sessions, now);
 
   // Stats
   document.getElementById('s-total').textContent=sessions.length;
@@ -1086,6 +1279,40 @@ function getWeeks(){
     w.push({s,e,label:mo});
   }
   return w;
+}
+
+function drawMonthlyHeatmap(allSessions, now){
+  const grid = document.getElementById('hmGrid');
+  const monthNames = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const curM = now.getMonth(), curY = now.getFullYear();
+  document.getElementById('hmMonth').textContent = `${monthNames[curM]} ${curY}`;
+
+  const daysInMonth = new Date(curY, curM + 1, 0).getDate();
+  
+  // Filtramos solo las sesiones del mes actual para el heatmap
+  const sessionsThisMonth = allSessions.filter(s => {
+    const d = new Date(s.date + 'T00:00:00');
+    return d.getMonth() === curM && d.getFullYear() === curY;
+  });
+  const trainedDays = new Set(sessionsThisMonth.map(s => parseInt(s.date.split('-')[2])));
+  const today = now.getDate();
+
+  let html = '';
+  // Añadir espacios vacíos para alinear el primer día de la semana (Lunes=1, ..., Domingo=0)
+  const firstDay = new Date(curY, curM, 1).getDay();
+  const offset = firstDay === 0 ? 6 : firstDay - 1; 
+
+  for(let i=0; i<offset; i++) html += '<div style="opacity:0"></div>';
+  
+  for(let d=1; d<=daysInMonth; d++){
+    const isTrained = trainedDays.has(d);
+    const isToday = d === today;
+    html += `<div class="hm-day${isTrained?' train':''}${isToday?' today':''}">
+      ${d}
+      ${isTrained?'<div class="dot"></div>':''}
+    </div>`;
+  }
+  grid.innerHTML = html;
 }
 
 function drawWeekly(sessions){
@@ -1412,6 +1639,7 @@ function saveSettings(){
   else if(document.getElementById('sPin').value === '') users[idx].pin='';
   const theme = document.getElementById('sTheme').value;
   users[idx].theme = theme;
+  users[idx].showTimers = document.getElementById('sShowTimers').checked;
   DB.saveUsers(users);
   CU=users[idx];
   applyTheme(theme, CU.color||'default');
@@ -1427,7 +1655,7 @@ function exportData(){
     _tt_export: true,
     version: 2,
     exportDate: new Date().toISOString(),
-    user: { name:CU.name, pin:CU.pin, theme:CU.theme, sex:CU.sex, age:CU.age, height:CU.height, weight:CU.weight },
+    user: { name:CU.name, pin:CU.pin, theme:CU.theme, sex:CU.sex, age:CU.age, height:CU.height, weight:CU.weight, showTimers:CU.showTimers },
     sessions: d.sessions
   };
   const blob=new Blob([JSON.stringify(exportObj,null,2)],{type:'application/json'});
