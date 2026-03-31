@@ -1379,7 +1379,8 @@ function drawCalories(sessions){
     const dow = now.getDay(); // 0=dom
     const diffToMon = dow===0 ? 6 : dow-1;
     const monThis = new Date(now); monThis.setDate(now.getDate()-diffToMon);
-    const start = calPeriod==='week' ? monThis : new Date(monThis.getTime()-7*864e5);
+    const start = new Date(monThis);
+    if(calPeriod === 'lastweek') start.setDate(start.getDate()-7);
     const days = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
     labels = days;
     calData = days.map((_,i)=>{
@@ -1397,8 +1398,8 @@ function drawCalories(sessions){
     labels = [];
     calData = [];
     for(let w=3;w>=0;w--){
-      const wStart = new Date(monThis.getTime()-w*7*864e5);
-      const wEnd   = new Date(wStart.getTime()+6*864e5); wEnd.setHours(23,59,59,999);
+      const wStart = new Date(monThis); wStart.setDate(monThis.getDate()-w*7);
+      const wEnd   = new Date(wStart); wEnd.setDate(wStart.getDate()+6); wEnd.setHours(23,59,59,999);
       const label  = wStart.toLocaleDateString('es-ES',{day:'numeric',month:'short'});
       labels.push(label);
       const kcal = sessions
