@@ -1,9 +1,12 @@
 // TrisTras Service Worker — Offline + Auto-Update
 // ⚑  Cambia CACHE_VERSION al subir nuevos cambios → dispara notificación de actualización
-const CACHE_VERSION = 'v22';
+const CACHE_VERSION = 'v23';
 const CACHE = `tristras-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [
+  './index.html',
+  './style.css',
+  './app.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -12,17 +15,13 @@ const STATIC_ASSETS = [
 ];
 
 // ── INSTALL ──────────────────────────────────────────
-// Pre-cachea assets estáticos. NO llama a skipWaiting() aquí:
-// el nuevo SW espera en estado "waiting" hasta que el usuario confirme.
 self.addEventListener('install', e => {
   e.waitUntil(
     caches.open(CACHE).then(cache => cache.addAll(STATIC_ASSETS))
-    // Sin skipWaiting() → el SW queda en "waiting", notificamos a la app
   );
 });
 
 // ── ACTIVATE ─────────────────────────────────────────
-// Limpia cachés viejos y toma control de todos los clientes
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys()
@@ -32,14 +31,14 @@ self.addEventListener('activate', e => {
 });
 
 // ── MESSAGE ──────────────────────────────────────────
-// La app envía 'SKIP_WAITING' cuando el usuario toca "Actualizar"
 self.addEventListener('message', e => {
-  if (e.data === 'SKIP_WAITING') self.skipWaiting();
+  // Maneja tanto el string simple como el objeto con action
+  if (e.data === 'SKIP_WAITING' || (e.data && e.data.action === 'skipWaiting')) {
+    self.skipWaiting();
+  }
 });
 
 // ── FETCH ─────────────────────────────────────────────
-// index.html → Network-first  (siempre fresco, offline usa caché)
-// resto      → Cache-first    (assets estáticos, rápido)
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   const isNavigation = e.request.mode === 'navigate'
