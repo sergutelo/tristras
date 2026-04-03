@@ -48,7 +48,7 @@ body.light-theme.theme-blue{ --p1:#1d4ed8;--p2:#2563eb;--coral:#3b82f6;--coral2:
 .cal-pill.act{background:linear-gradient(135deg,var(--coral),var(--coral2));color:#fff;border-color:transparent;
   box-shadow:0 4px 12px rgba(249,115,22,.35)}
 
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;max-width:100vw}
 .screen{display:none;min-height:100vh}
 .screen.active{display:block}
 
@@ -146,9 +146,9 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 
 /* ── EXERCISE ROWS ── */
 .ex-row{background:var(--card2);border-radius:12px;padding:16px;margin-bottom:10px;border:1px solid var(--border)}
-.ex-name{font-size:.9rem;font-weight:700;color:var(--p2);margin-bottom:10px}
+.ex-name{font-size:.9rem;font-weight:700;color:var(--p2);margin-bottom:10px;overflow-wrap:anywhere;word-break:break-word}
 .sets-header,.set-row{display:grid;grid-template-columns:36px 1fr 1fr 1fr;gap:8px;align-items:center}
-.ot-grid .sets-header,.ot-grid .set-row{grid-template-columns:36px 1fr 1fr 1fr 1.2fr}
+.ot-grid .sets-header,.ot-grid .set-row{grid-template-columns:36px 1fr 1fr 1.2fr}
 .sets-header{font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:6px;text-transform:uppercase}
 .set-row{margin-bottom:6px}
 .set-num{color:var(--p2);font-weight:800;font-size:.85rem;text-align:center}
@@ -168,7 +168,7 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 .sess-card{background:var(--card2);border-radius:13px;padding:16px;margin-bottom:10px;
   border-left:4px solid var(--p1);cursor:pointer;transition:.2s;border:1px solid var(--border);border-left:4px solid var(--p1)}
 .sess-card:hover{transform:translateX(4px);border-color:var(--p2)}
-.sess-card h4{font-size:.9rem;font-weight:700}
+.sess-card h4{font-size:.9rem;font-weight:700;overflow-wrap:anywhere}
 .sess-card .sm{font-size:.75rem;color:var(--muted);margin-top:4px}
 .badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:.68rem;font-weight:700;
   background:rgba(124,58,237,.2);color:var(--p2);margin:2px 2px 0 0}
@@ -285,10 +285,12 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
 
 @media(max-width:768px){
   .nav-tabs{display:none}
-  .stat-grid{grid-template-columns:repeat(2,1fr)}
-  .prog-grid{grid-template-columns:repeat(2,1fr)}
-  .tcont{padding:16px}
-  .login-box{margin:16px;padding:28px 22px}
+  .stat-grid{grid-template-columns:repeat(auto-fit,minmax(140px,1fr))}
+  .prog-grid{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  .tcont{padding:12px}
+  .login-box{margin:12px;padding:28px 18px}
   #mobileNav{display:flex}
-  body{padding-bottom:70px}
+  body{padding-bottom:75px}
+  .sets-header,.set-row{grid-template-columns:30px 1fr 1fr 1fr;gap:4px;font-size:0.8rem}
+  .ot-grid .sets-header,.ot-grid .set-row{grid-template-columns:30px 1fr 1fr 1fr}
 }

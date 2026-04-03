@@ -1,6 +1,6 @@
 // TrisTras Service Worker — Offline + Auto-Update
 // ⚑  Cambia CACHE_VERSION al subir nuevos cambios → dispara notificación de actualización
-const CACHE_VERSION = 'v23';
+const CACHE_VERSION = 'v29';
 const CACHE = `tristras-${CACHE_VERSION}`;
 
 const STATIC_ASSETS = [

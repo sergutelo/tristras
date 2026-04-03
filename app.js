@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   TrisTras — App Logic (v1.2.1) — PRODUCTO REAL CUERPOS SERRANOS
+   TrisTras — App Logic (v1.3.0) — PRODUCTO REAL CUERPOS SERRANOS
    ══════════════════════════════════════════════════════════════════ */
 
 // ── PWA UPDATE SYSTEM ──
@@ -440,7 +440,17 @@ function fillExSel(sessions){
   const sel = document.getElementById('exSel');
   const exs = new Set();
   sessions.forEach(s=>s.exercises.forEach(e=>exs.add(e.exercise)));
-  sel.innerHTML = [...exs].map(e=>`<option value="${e}">${e}</option>`).join('') || '<option>Sin datos</option>';
+  
+  // Ordenar alfabéticamente para facilitar la búsqueda
+  const sortedExs = [...exs].sort();
+  
+  sel.innerHTML = sortedExs.map(e=>{
+    // Acortamos el nombre para que no rompa el diseño en móviles
+    // pero mantenemos el valor original (value) para que la gráfica funcione
+    let label = e.split('.')[0].split('"')[0].trim();
+    if(label.length > 28) label = label.substring(0, 25) + '...';
+    return `<option value="${e}">${label}</option>`;
+  }).join('') || '<option>Sin datos</option>';
 }
 
 function drawProgress(){
@@ -499,6 +509,11 @@ function drawRecent(sessions){
 
 // ── LOG WORKOUT ──
 function initLog(){
+  document.getElementById('log-step1').style.display='block';
+  document.getElementById('log-step2').style.display='none';
+  document.getElementById('logTitle').textContent = "Registrar entreno";
+  if(document.getElementById('btnCancelEdit')) document.getElementById('btnCancelEdit').style.display = 'none';
+  
   const g = document.getElementById('progGrid');
   g.innerHTML = Object.entries(PROGRAMS).map(([k,v])=>`
     <div class="prog-card" id="pc-${k}" onclick="selProg('${k}')">
@@ -514,13 +529,11 @@ function selProg(k){
   document.querySelectorAll('.prog-card').forEach(c=>c.classList.remove('sel'));
   if(document.getElementById('pc-'+k)) document.getElementById('pc-'+k).classList.add('sel');
   currentWorkout = { program:k, exercises:[] };
-  const s = document.getElementById('sessSelect');
-  s.innerHTML = (PROGRAMS[k]?.s || []).map(x=>`<option>${x}</option>`).join('');
 }
 
 function goStep2(){
   const k = currentWorkout.program;
-  currentWorkout.sessionName = document.getElementById('sessSelect').value;
+  currentWorkout.sessionName = (PROGRAMS[k]?.s || [])[0] || 'Sesión única';
   currentWorkout.date = document.getElementById('wDate').value;
   currentWorkout.duration = parseInt(document.getElementById('wDur').value)||20;
   currentWorkout.notes = document.getElementById('wNotes').value;
@@ -561,10 +574,16 @@ function addSet(bi,ei,data=null){
   const c = document.getElementById(`sets-${bi}-${ei}`);
   const si = c.children.length + 1;
   const row = document.createElement('div'); row.className = 'set-row';
+  
+  // Valores por defecto: 10 reps, 0 kg si es una serie nueva (data == null)
+  const reps = data ? data.r : 10;
+  const weight = data ? data.w : 0;
+  const note = data ? data.n : '';
+
   row.innerHTML = `<div class="set-num">${si}</div>
-    <input type="number" class="in-r" placeholder="0" value="${data?.r||''}">
-    <input type="number" step="0.1" class="in-w" placeholder="0" value="${data?.w||''}">
-    <input type="text" class="in-n" placeholder="—" value="${data?.n||''}">`;
+    <input type="number" class="in-r" placeholder="0" value="${reps}">
+    <input type="number" step="0.1" class="in-w" placeholder="0" value="${weight}">
+    <input type="text" class="in-n" placeholder="—" value="${note}">`;
   c.appendChild(row);
 }
 
@@ -617,9 +636,9 @@ function drawHistory(){
         <div><h3>${s.programName || PROGRAMS[s.program]?.n || s.program}</h3><p class="sub">${new Date(s.date+'T00:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</p></div>
         <div class="flex"><button class="btn btn-sec btn-sm" onclick="editSession('${s.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteSession('${s.id}')">🗑️</button></div>
       </div>
-      <p class="sub"><b>${s.sessionName || s.session || ''}</b> • ${s.duration || '?'} min</p>
+      ${s.program !== 'ot' ? `<p class="sub"><b>${s.sessionName || s.session || ''}</b> • ${s.duration || '?'} min</p>` : ''}
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px" class="mt14">
-        ${s.exercises.map(ex=>`<div style="font-size:.75rem;background:var(--card2);padding:8px;border-radius:10px"><span style="color:var(--p2);font-weight:700">${ex.exercise}</span><br>${ex.sets.map(st=>st.weight+(s.program==='ot'?'km':'kg')).join(' · ')}</div>`).join('')}
+        ${s.exercises.map(ex=>`<div style="font-size:.75rem;background:var(--card2);padding:8px;border-radius:10px"><span style="color:var(--p2);font-weight:700">${ex.exercise}</span><br>${ex.sets.map(st=> s.program==='ot' ? `${st.reps}km/${st.weight}min` : `${st.reps}x${st.weight}kg`).join(' · ')}</div>`).join('')}
       </div>
     </div>
   `).join('') || '<p class="empty">Vacío</p>';
@@ -628,15 +647,17 @@ function deleteSession(id){ if(confirm("¿Borrar?")){ const d=DB.data(CU.id); d.
 function editSession(id){
   const d=DB.data(CU.id); editIdx=d.sessions.findIndex(s=>s.id===id); currentWorkout={...d.sessions[editIdx]};
   showTab('log'); document.getElementById('logTitle').textContent="Editar entreno";
-  selProg(currentWorkout.program); document.getElementById('sessSelect').value=currentWorkout.sessionName;
+  if(document.getElementById('btnCancelEdit')) document.getElementById('btnCancelEdit').style.display = 'block';
+  selProg(currentWorkout.program);
   document.getElementById('wDate').value=currentWorkout.date; document.getElementById('wDur').value=currentWorkout.duration; document.getElementById('wNotes').value=currentWorkout.notes;
 }
+function cancelEdit(){ editIdx=-1; showTab('history'); }
 function fillEditData(){
   currentWorkout.exercises.forEach(ex=>{
     document.querySelectorAll('.ex-row').forEach((row, ri)=>{
       if(row.querySelector('.ex-name').textContent === ex.exercise){
         const bi = Array.from(document.querySelectorAll('.ex-block')).findIndex(b=>b.contains(row));
-        ex.sets.forEach(st=>addSet(bi, ri%20, ex.exercise, {w:st.weight, r:st.reps, n:st.note}));
+        ex.sets.forEach(st=>addSet(bi, ri%20, {w:st.weight, r:st.reps, n:st.note}));
       }
     });
   });
