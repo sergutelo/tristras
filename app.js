@@ -50,77 +50,77 @@ const PROGRAMS = {
 const EJERCICIOS = {
   '🦄 Pack 1A': [
     'Media sentadilla. "El pantalón vaquero"',
-    'Curl de bíceps con banda elástica. "La camiseta blanca"',
-    'Zancada adelante y rodilla al suelo. "Las converse"',
-    'Press de pecho con banda elástica. "El Mazinger Z"',
+    'Curl de bíceps. "La camiseta blanca"',
+    'Zancada adelante y rodilla. "Las converse"',
+    'Press de pecho con banda. "El Mazinger Z"',
     'Puente de glúteos sin banda. "Las Kardashian"',
-    'Remo con banda elástica sentado en el suelo'
+    'Remo con banda sentado'
   ],
   '🦄 Pack 1B': [
     'Media sentadilla. "El pantalón vaquero"',
-    'Curl de bíceps con banda elástica. "La camiseta blanca"',
-    'Zancada adelante y rodilla al suelo. "Las converse"',
-    'Extensión de tríceps de pie con banda elástica. "El latigazo"',
-    'Abducción de cadera con mini banda. "La almeja"',
-    'Aperturas de hombros con banda elástica agarre prono. "El bostezo"'
+    'Curl de bíceps. "La camiseta blanca"',
+    'Zancada adelante y rodilla a suelo. "Las converse"',
+    'Extensión de tríceps con banda . "El latigazo"',
+    'Abducción de cadera con banda. "La almeja"',
+    'Aperturas de hombros con banda. "El bostezo"'
   ],
   '💛 Pack 2A': [
     'Media sentadilla. "Pantalón vaquero"',
-    'Curl de bíceps con banda elástica. "Camiseta blanca"',
-    'Puente de glúteos con mini banda elástica. "Kardashian con goma"',
-    'Extensión de cadera con banda elástica. "Coz de pie"',
-    'Zancadas laterales con banda elástica. "El Godzilla"',
-    'Jalón dorsal con banda elástica. "La aspiradora"',
+    'Curl de bíceps . "Camiseta blanca"',
+    'Puente de glúteos con banda . "Kardashian con goma"',
+    'Extensión de cadera con banda . "Coz de pie"',
+    'Zancadas laterales con banda . "El Godzilla"',
+    'Jalón dorsal con banda . "La aspiradora"',
     'Puente con extensión de rodilla'
   ],
   '💛 Pack 2B': [
     'Media sentadilla. "Pantalón vaquero"',
-    'Extensión de tríceps de pie con banda elástica. "El latigazo"',
-    'Puente de glúteos con mini banda elástica. "Kardashian con gomas"',
-    'Flexiones de brazos con rodillas apoyadas. "Flexión con barreños"',
-    'Rotación externa de hombros con banda elástica. "Maldito rotador"',
-    'Patada de glúteo con banda elástica. "Coz del borriquito"',
-    'Curl de bíceps concentrado con banda elástica sentado en silla. "El presidiario"'
+    'Extensión de tríceps. "El latigazo"',
+    'Puente de glúteos con banda . "Kardashian con gomas"',
+    'Flexiones de brazos y rodillas apoyadas. "Flexión con barreños"',
+    'Rotación externa de hombros con banda . "Maldito rotador"',
+    'Patada de glúteo con banda. "Coz del borriquito"',
+    'Curl de bíceps con banda sentado. "El presidiario"'
   ],
   '🍊 Pack 3A': [
     'Media sentadilla con goma o peso. "El Pantalón Vaquero"',
-    'Extensión de tríceps de pie con banda elástica. "El latigazo"',
-    'Zancada adelante y rodilla al suelo (con peso). "Las Converse con peso"',
-    'Curl de bíceps con banda elástica. "La camiseta blanca"',
-    'Desplazamiento lateral con banda elástica. "Pachín, pachín, los patitos"',
+    'Extensión de tríceps con banda . "El latigazo"',
+    'Zancada adelante (con peso). "Las Converse con peso"',
+    'Curl de bíceps. "La camiseta blanca"',
+    'Desplazamiento lateral. "Pachín, pachín, los patitos"',
     'Extensión tríceps sentado (con peso). "Latigazo con garrafa"',
-    'Patada de glúteo con banda elástica. "La coz del borriquito"',
+    'Patada de glúteo con banda. "La coz del borriquito"',
     'Under switch animal flow. "El matrix"'
   ],
   '🍊 Pack 3B': [
     'Media sentadilla con goma o peso. "El Pantalón Vaquero"',
-    'Extensión de tríceps de pie con banda elástica. "El latigazo"',
-    'Zancada adelante y rodilla al suelo (con peso). "Las Converse con peso"',
-    'Curl de bíceps con banda elástica. "La camiseta blanca"',
+    'Extensión de tríceps con banda. "El latigazo"',
+    'Zancada adelante (con peso). "Las Converse con peso"',
+    'Curl de bíceps con banda. "La camiseta blanca"',
     'Muñecas de famosa (2x)',
-    'Abducción de cadera con banda elástica y piernas abiertas. "La almeja de pie"',
-    'Aperturas de hombros con banda elástica de pie (elevaciones laterales). "El playmobil de pie"',
+    'Abducción de cadera con banda. "La almeja de pie"',
+    'Aperturas de hombros de pie (elev laterales). "El playmobil"',
     'Peso muerto con goma. "Paquito el chocolatero"'
   ],
   '🥋 Pack 4A': [
-    'Media sentadilla con Peso. "Pantalón vaquero"',
-    'Flexiones de brazos con rodillas apoyadas. "Flexión con barreños"',
+    'Media sentadilla con peso. "Pantalón vaquero"',
+    'Flexiones de brazos y rodillas apoyadas. "Flexión con barreños"',
     'Peso muerto con goma. "Paquito el chocolatero"',
-    'Curl de bíceps con banda elástica. "Camiseta blanca"',
-    'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas del oxígeno"',
-    'Puente de glúteos con elevación de una pierna. "Kardashian-cabaret"',
+    'Curl de bíceps con banda. "Camiseta blanca"',
+    'Resistencia: Skipping, comba.. "Las trillizas del oxígeno"',
+    'Puente de glúteos con elevación. "Kardashian-cabaret"',
     'Reverse Pec Deck. "Cu-cú...¡TRAS!"',
-    'Zancada lateral con deslizador (slider). "La mopa"'
+    'Zancada lateral (slider). "La mopa"'
   ],
   '🥋 Pack 4B': [
     'Media sentadilla con Peso. "El pantalón vaquero con goma"',
     'Plancha horizontal isométrica. "La plancha"',
-    'Curl de bíceps con banda elástica. "La camiseta blanca"',
-    'Flexiones de brazos con rodillas apoyadas. "Flexiones con barreños"',
+    'Curl de bíceps. "La camiseta blanca"',
+    'Flexiones de brazos y rodillas apoyadas. "Flexiones con barreños"',
     'Jalón con Goma. "Superman"',
-    'Desplazamiento lateral en plancha con banda de resistencia. "La plancha en marcha"',
+    'Desplazamiento lateral en plancha con banda. "La plancha en marcha"',
     'Press de hombro con goma sentado. "La maleta"',
-    'Resistencia: Skipping, comba, boxeo, jumping jacks. "Las trillizas del oxígeno"'
+    'Resistencia: Skipping, comba.. "Las trillizas del oxígeno"'
   ],
   '🏃 Actividad': ['Correr','Caminar','Bici','Natación','Yoga','Pilates','Otro']
 };
