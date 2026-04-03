@@ -626,8 +626,22 @@ function startRest(s){
 
 // ── HISTORY ──
 function drawHistory(){
-  const sess = DB.data(CU.id).sessions || [];
-  const filt = document.getElementById('histFilter').value;
+  const d = DB.data(CU.id);
+  // Ordenar por fecha descendente (más reciente arriba)
+  const sess = (d.sessions || []).sort((a,b)=>b.date.localeCompare(a.date));
+  const sel = document.getElementById('histFilter');
+  const cur = sel.value;
+
+  // Poblar filtro con programas que existen en las sesiones
+  const progs = [...new Set(sess.map(s=>s.program))];
+  let h = '<option value="">Todos los programas</option>';
+  progs.sort().forEach(p=>{
+    const name = PROGRAMS[p]?.n || p;
+    h += `<option value="${p}" ${p===cur?'selected':''}>${name}</option>`;
+  });
+  if(sel.innerHTML !== h) sel.innerHTML = h;
+
+  const filt = sel.value;
   const filtered = filt ? sess.filter(s=>s.program===filt) : sess;
   document.getElementById('histCount').textContent = `${filtered.length} sesiones`;
   document.getElementById('histList').innerHTML = filtered.map(s=>`
