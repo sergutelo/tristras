@@ -245,7 +245,7 @@ function showTab(t){
   if(document.getElementById('nt-'+t)) document.getElementById('nt-'+t).classList.add('act');
   if(document.getElementById('mn-'+t)) document.getElementById('mn-'+t).classList.add('act');
   if(t==='dashboard') drawDashboard();
-  if(t==='log' && editIdx<0) initLog();
+  if(t==='log') { if(editIdx<0) initLog(); else initLogForEdit(); }
   if(t==='history') drawHistory();
   if(t==='settings') initSettings();
   window.scrollTo(0,0);
@@ -498,13 +498,22 @@ function drawPRs(sessions){
 
 function drawRecent(sessions){
   const el = document.getElementById('recentList');
-  el.innerHTML = sessions.slice(0,5).map(s=>`
+  el.innerHTML = sessions.slice(0,5).map(s=>{
+    let subtitle = s.sessionName || s.session || '';
+    if(s.program === 'ot' && s.exercises && s.exercises.length){
+      // Build "Actividad · Xkm" summary for OTRO sessions
+      subtitle = s.exercises.map(ex=>{
+        const totalKm = ex.sets.reduce((a,st)=>a+(parseFloat(st.reps)||0), 0);
+        return totalKm > 0 ? `${ex.exercise} · ${totalKm % 1 === 0 ? totalKm : totalKm.toFixed(1)} km` : ex.exercise;
+      }).join(', ');
+    }
+    return `
     <div class="sess-card" onclick="editSession('${s.id}')">
       <div class="between"><h4>${s.programName || PROGRAMS[s.program]?.n || s.program}</h4><span class="sub">${new Date(s.date+'T00:00:00').toLocaleDateString()}</span></div>
-      <p class="sm">${s.sessionName || s.session || ''}</p>
+      <p class="sm">${subtitle}</p>
       <div class="badge coral">${s.duration || '?'} min</div>
-    </div>
-  `).join('') || '<p class="sub">No hay sesiones aún</p>';
+    </div>`;
+  }).join('') || '<p class="sub">No hay sesiones aún</p>';
 }
 
 // ── LOG WORKOUT ──
@@ -528,7 +537,12 @@ function initLog(){
 function selProg(k){
   document.querySelectorAll('.prog-card').forEach(c=>c.classList.remove('sel'));
   if(document.getElementById('pc-'+k)) document.getElementById('pc-'+k).classList.add('sel');
-  currentWorkout = { program:k, exercises:[] };
+  // Only reset exercises when NOT in edit mode
+  if(editIdx < 0) {
+    currentWorkout = { program:k, exercises:[] };
+  } else {
+    currentWorkout.program = k;
+  }
 }
 
 function goStep2(){
@@ -659,19 +673,46 @@ function drawHistory(){
 }
 function deleteSession(id){ if(confirm("¿Borrar?")){ const d=DB.data(CU.id); d.sessions=d.sessions.filter(s=>s.id!==id); DB.save(CU.id,d); drawHistory(); } }
 function editSession(id){
-  const d=DB.data(CU.id); editIdx=d.sessions.findIndex(s=>s.id===id); currentWorkout={...d.sessions[editIdx]};
-  showTab('log'); document.getElementById('logTitle').textContent="Editar entreno";
+  const d=DB.data(CU.id);
+  editIdx = d.sessions.findIndex(s=>s.id===id);
+  currentWorkout = JSON.parse(JSON.stringify(d.sessions[editIdx])); // deep copy to preserve exercises
+  showTab('log');
+}
+function initLogForEdit(){
+  document.getElementById('log-step1').style.display='block';
+  document.getElementById('log-step2').style.display='none';
+  document.getElementById('logTitle').textContent = "Editar entreno";
   if(document.getElementById('btnCancelEdit')) document.getElementById('btnCancelEdit').style.display = 'block';
-  selProg(currentWorkout.program);
-  document.getElementById('wDate').value=currentWorkout.date; document.getElementById('wDur').value=currentWorkout.duration; document.getElementById('wNotes').value=currentWorkout.notes;
+
+  const g = document.getElementById('progGrid');
+  g.innerHTML = Object.entries(PROGRAMS).map(([k,v])=>`
+    <div class="prog-card" id="pc-${k}" onclick="selProg('${k}')">
+      <div class="pe">${v.e}</div><h3>${v.n}</h3><p class="pd">${v.d}</p>
+    </div>
+  `).join('');
+
+  // Mark the correct program as selected WITHOUT resetting exercises
+  document.querySelectorAll('.prog-card').forEach(c=>c.classList.remove('sel'));
+  const k = currentWorkout.program;
+  if(document.getElementById('pc-'+k)) document.getElementById('pc-'+k).classList.add('sel');
+
+  // Fill step1 form with saved values
+  document.getElementById('wDate').value = currentWorkout.date;
+  document.getElementById('wDur').value = currentWorkout.duration;
+  document.getElementById('wNotes').value = currentWorkout.notes || '';
 }
 function cancelEdit(){ editIdx=-1; showTab('history'); }
 function fillEditData(){
+  const allBlocks = Array.from(document.querySelectorAll('.ex-block'));
   currentWorkout.exercises.forEach(ex=>{
-    document.querySelectorAll('.ex-row').forEach((row, ri)=>{
-      if(row.querySelector('.ex-name').textContent === ex.exercise){
-        const bi = Array.from(document.querySelectorAll('.ex-block')).findIndex(b=>b.contains(row));
-        ex.sets.forEach(st=>addSet(bi, ri%20, {w:st.weight, r:st.reps, n:st.note}));
+    document.querySelectorAll('.ex-row').forEach((row)=>{
+      if(row.querySelector('.ex-name').textContent.trim() === ex.exercise.trim()){
+        const bi = allBlocks.findIndex(b=>b.contains(row));
+        const blockRows = allBlocks[bi] ? Array.from(allBlocks[bi].querySelectorAll('.ex-row')) : [];
+        const ei = blockRows.indexOf(row);
+        if(bi >= 0 && ei >= 0){
+          ex.sets.forEach(st=>addSet(bi, ei, {w:st.weight, r:st.reps, n:st.note||''}));
+        }
       }
     });
   });
