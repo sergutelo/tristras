@@ -126,6 +126,8 @@ const EJERCICIOS = {
 };
 
 const METS = { '1a':4.5, '1b':4.5, '2a':5.5, '2b':5.5, '3a':6.5, '3b':6.5, '4a':8.0, '4b':8.0, 'ot':7.0 };
+const MOODS = ['','😴','😐','🙂','💪','🔥'];
+const MOOD_LABELS = ['','Agotado','Normal','Bien','Fuerte','¡Brutal!'];
 
 // ── APP STATE ──
 let hmDate = new Date();
@@ -133,6 +135,9 @@ let currentWorkout = null;
 let editIdx = -1;
 let calPeriod = 'week';
 let charts = {};
+let lastSavedSessionId = null;
+let selectedMood = 0;
+let repeatMode = false;
 
 // ── LOGIN LÓGICA ──
 window.onload = () => {
@@ -190,8 +195,6 @@ function doLogin(user){
   applyTheme(CU.theme);
   applyColor(CU.color);
   
-  document.getElementById('navName').textContent = CU.name;
-  document.getElementById('navAvatar').textContent = CU.name[0].toUpperCase();
   updateGreeting();
   
   showTab('dashboard');
@@ -245,7 +248,7 @@ function showTab(t){
   if(document.getElementById('nt-'+t)) document.getElementById('nt-'+t).classList.add('act');
   if(document.getElementById('mn-'+t)) document.getElementById('mn-'+t).classList.add('act');
   if(t==='dashboard') drawDashboard();
-  if(t==='log') { if(editIdx<0) initLog(); else initLogForEdit(); }
+  if(t==='log') { if(editIdx>=0) initLogForEdit(); else if(repeatMode) initLogForRepeat(); else initLog(); }
   if(t==='history') drawHistory();
   if(t==='settings') initSettings();
   window.scrollTo(0,0);
@@ -288,6 +291,7 @@ function drawDashboard(){
   });
   document.getElementById('s-km').textContent = maxKm % 1 === 0 ? maxKm : maxKm.toFixed(1);
 
+  drawWeeklyGoal(sessions);
   drawWeekly(sessions);
   fillExSel(sessions);
   drawProgress();
@@ -511,7 +515,11 @@ function drawRecent(sessions){
     <div class="sess-card" onclick="editSession('${s.id}')">
       <div class="between"><h4>${s.programName || PROGRAMS[s.program]?.n || s.program}</h4><span class="sub">${new Date(s.date+'T00:00:00').toLocaleDateString()}</span></div>
       <p class="sm">${subtitle}</p>
-      <div class="badge coral">${s.duration || '?'} min</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:4px;flex-wrap:wrap">
+        <div class="badge coral">${s.duration || '?'} min</div>
+        ${s.mood ? `<span class="mood-badge" title="${MOOD_LABELS[s.mood]}">${MOODS[s.mood]}</span>` : ''}
+        <button class="repeat-btn" onclick="event.stopPropagation();repeatWorkout('${s.id}')" title="Repetir">🔁</button>
+      </div>
     </div>`;
   }).join('') || '<p class="sub">No hay sesiones aún</p>';
 }
@@ -537,8 +545,8 @@ function initLog(){
 function selProg(k){
   document.querySelectorAll('.prog-card').forEach(c=>c.classList.remove('sel'));
   if(document.getElementById('pc-'+k)) document.getElementById('pc-'+k).classList.add('sel');
-  // Only reset exercises when NOT in edit mode
-  if(editIdx < 0) {
+  // Only reset exercises when NOT in edit/repeat mode
+  if(editIdx < 0 && !repeatMode) {
     currentWorkout = { program:k, exercises:[] };
   } else {
     currentWorkout.program = k;
@@ -574,7 +582,7 @@ function goStep2(){
     `).join('');
     b.appendChild(div);
   });
-  if(editIdx>-1) fillEditData();
+  if(editIdx>-1 || repeatMode) fillEditData();
 }
 
 function selBlock(i){
@@ -619,9 +627,86 @@ function saveWorkout(){
   if(!exs.length) return alert("Mínimo un ejercicio");
   currentWorkout.exercises = exs;
   const d = DB.data(CU.id);
-  if(editIdx > -1) { d.sessions[editIdx] = {...d.sessions[editIdx], ...currentWorkout}; editIdx=-1; }
-  else { currentWorkout.id = 's'+Date.now(); d.sessions.unshift(currentWorkout); }
-  DB.save(CU.id, d); stopStopwatch(); showTab('dashboard');
+  // Snapshot prev sessions for PR comparison BEFORE saving
+  const prevSessions = editIdx > -1 ? d.sessions.filter((_,i) => i !== editIdx) : [...d.sessions];
+  if(editIdx > -1) {
+    lastSavedSessionId = d.sessions[editIdx].id;
+    d.sessions[editIdx] = {...d.sessions[editIdx], ...currentWorkout}; editIdx = -1;
+  } else {
+    currentWorkout.id = 's'+Date.now();
+    lastSavedSessionId = currentWorkout.id;
+    d.sessions.unshift(currentWorkout);
+  }
+  DB.save(CU.id, d); stopStopwatch(); repeatMode = false;
+  showPostWorkoutModal(detectNewPRs(exs, prevSessions, currentWorkout.program));
+}
+
+function detectNewPRs(exercises, prevSessions, program){
+  const isOt = program === 'ot';
+  const newPRs = [];
+  exercises.forEach(ex => {
+    const currentMax = Math.max(...ex.sets.map(st => isOt ? (parseFloat(st.reps)||0) : (parseFloat(st.weight)||0)));
+    if(currentMax <= 0) return;
+    let prevBest = 0, hadPrev = false;
+    prevSessions.forEach(s => {
+      const found = s.exercises.find(e => e.exercise === ex.exercise);
+      if(found){ hadPrev = true; found.sets.forEach(st => { const v = isOt ? (parseFloat(st.reps)||0) : (parseFloat(st.weight)||0); if(v > prevBest) prevBest = v; }); }
+    });
+    if(hadPrev && currentMax > prevBest) newPRs.push({ exercise: ex.exercise, old: prevBest, new: currentMax, unit: isOt ? 'km' : 'kg' });
+  });
+  return newPRs;
+}
+
+function showPostWorkoutModal(prs){
+  selectedMood = 0;
+  document.querySelectorAll('.pw-mb').forEach(b => b.classList.remove('sel'));
+  const hasPR = prs.length > 0;
+  document.getElementById('pwBigEmoji').textContent = hasPR ? '🏆' : '💪';
+  document.getElementById('pwTitle').textContent = hasPR ? '¡Nuevos récords! 🎉' : '¡Entreno guardado!';
+  document.getElementById('pwSub').textContent = hasPR
+    ? `${prs.length} récord${prs.length > 1 ? 's' : ''} personal${prs.length > 1 ? 'es' : ''} superado${prs.length > 1 ? 's' : ''}`
+    : 'Sigue así, campeón/a 💫';
+  const prSec = document.getElementById('pwPRSection');
+  if(hasPR){
+    prSec.style.display = 'block';
+    const shortName = n => n.split('"')[0].split('.')[0].trim().split(' ').slice(0,5).join(' ');
+    document.getElementById('pwPRList').innerHTML = prs.slice(0,3).map(pr =>
+      `<div class="pw-pr-chip">🔥 ${shortName(pr.exercise)}<strong>${pr.old} → ${pr.new} ${pr.unit}</strong></div>`
+    ).join('');
+    launchConfetti();
+  } else {
+    prSec.style.display = 'none';
+  }
+  document.getElementById('postWorkoutModal').style.display = 'flex';
+}
+
+function selectMood(n){
+  selectedMood = n;
+  document.querySelectorAll('.pw-mb').forEach(b => b.classList.toggle('sel', parseInt(b.dataset.mood) === n));
+}
+
+function closePostWorkout(){
+  document.getElementById('postWorkoutModal').style.display = 'none';
+  if(selectedMood > 0 && lastSavedSessionId){
+    const d = DB.data(CU.id);
+    const s = d.sessions.find(x => x.id === lastSavedSessionId);
+    if(s){ s.mood = selectedMood; DB.save(CU.id, d); }
+  }
+  showTab('dashboard');
+}
+
+function launchConfetti(){
+  const colors = ['#a855f7','#f97316','#22c55e','#3b82f6','#f472b6','#fbbf24','#60a5fa'];
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'position:fixed;inset:0;pointer-events:none;z-index:9998;overflow:hidden';
+  document.body.appendChild(wrap);
+  for(let i=0; i<65; i++){
+    const el = document.createElement('div');
+    const size = Math.random()*9+4;
+    el.style.cssText = `position:absolute;top:-12px;left:${Math.random()*100}%;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'3px'};animation:confettiFall ${Math.random()*2.5+2}s ${Math.random()*1.5}s ease-in forwards`;
+    wrap.appendChild(el);
+  }
+  setTimeout(() => wrap.remove(), 5500);
 }
 
 // ── TIMER ──
@@ -662,7 +747,7 @@ function drawHistory(){
     <div class="card">
       <div class="between mb14">
         <div><h3>${s.programName || PROGRAMS[s.program]?.n || s.program}</h3><p class="sub">${new Date(s.date+'T00:00:00').toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long'})}</p></div>
-        <div class="flex"><button class="btn btn-sec btn-sm" onclick="editSession('${s.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteSession('${s.id}')">🗑️</button></div>
+        <div class="flex">${s.mood ? `<span class="mood-badge" title="${MOOD_LABELS[s.mood]}">${MOODS[s.mood]}</span>` : ''}<button class="btn btn-sec btn-sm" onclick="repeatWorkout('${s.id}')" title="Repetir">🔁</button><button class="btn btn-sec btn-sm" onclick="editSession('${s.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteSession('${s.id}')">🗑️</button></div>
       </div>
       ${s.program !== 'ot' ? `<p class="sub"><b>${s.sessionName || s.session || ''}</b> • ${s.duration || '?'} min</p>` : ''}
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px" class="mt14">
@@ -682,7 +767,8 @@ function initLogForEdit(){
   document.getElementById('log-step1').style.display='block';
   document.getElementById('log-step2').style.display='none';
   document.getElementById('logTitle').textContent = "Editar entreno";
-  if(document.getElementById('btnCancelEdit')) document.getElementById('btnCancelEdit').style.display = 'block';
+  const btn = document.getElementById('btnCancelEdit');
+  if(btn){ btn.textContent = '❌ Cancelar edición'; btn.style.display = 'block'; }
 
   const g = document.getElementById('progGrid');
   g.innerHTML = Object.entries(PROGRAMS).map(([k,v])=>`
@@ -701,7 +787,7 @@ function initLogForEdit(){
   document.getElementById('wDur').value = currentWorkout.duration;
   document.getElementById('wNotes').value = currentWorkout.notes || '';
 }
-function cancelEdit(){ editIdx=-1; showTab('history'); }
+function cancelEdit(){ const wasRepeat=repeatMode; editIdx=-1; repeatMode=false; showTab(wasRepeat?'dashboard':'history'); }
 function fillEditData(){
   const allBlocks = Array.from(document.querySelectorAll('.ex-block'));
   currentWorkout.exercises.forEach(ex=>{
@@ -718,17 +804,81 @@ function fillEditData(){
   });
 }
 
+function repeatWorkout(id){
+  const d = DB.data(CU.id);
+  const sess = d.sessions.find(s => s.id === id);
+  if(!sess) return;
+  currentWorkout = JSON.parse(JSON.stringify(sess));
+  currentWorkout.date = new Date().toISOString().split('T')[0];
+  delete currentWorkout.id; delete currentWorkout.mood;
+  repeatMode = true; editIdx = -1;
+  showTab('log');
+}
+
+function initLogForRepeat(){
+  document.getElementById('log-step1').style.display = 'block';
+  document.getElementById('log-step2').style.display = 'none';
+  document.getElementById('logTitle').textContent = '🔁 Repetir entreno';
+  const btn = document.getElementById('btnCancelEdit');
+  if(btn){ btn.textContent = '❌ Cancelar'; btn.style.display = 'block'; }
+  const g = document.getElementById('progGrid');
+  g.innerHTML = Object.entries(PROGRAMS).map(([k,v])=>`
+    <div class="prog-card" id="pc-${k}" onclick="selProg('${k}')">
+      <div class="pe">${v.e}</div><h3>${v.n}</h3><p class="pd">${v.d}</p>
+    </div>
+  `).join('');
+  document.querySelectorAll('.prog-card').forEach(c=>c.classList.remove('sel'));
+  const k = currentWorkout.program;
+  if(document.getElementById('pc-'+k)) document.getElementById('pc-'+k).classList.add('sel');
+  document.getElementById('wDate').valueAsDate = new Date();
+  document.getElementById('wDur').value = currentWorkout.duration || '';
+  document.getElementById('wNotes').value = '';
+}
+
+function drawWeeklyGoal(sessions){
+  const el = document.getElementById('weekGoalCard');
+  if(!el) return;
+  const user = DB.getUsers().find(u => u.id === CU.id);
+  const goal = parseInt(user?.weekGoal) || 0;
+  if(!goal){ el.style.display='none'; return; }
+  el.style.display='';
+  const now = new Date();
+  const dow = now.getDay();
+  const diffToMonday = dow===0 ? 6 : dow-1;
+  const ws = new Date(now); ws.setDate(now.getDate()-diffToMonday); ws.setHours(0,0,0,0);
+  const weekDates = [...new Set(sessions.filter(s=>new Date(s.date+'T00:00:00')>=ws).map(s=>s.date))];
+  const done = weekDates.length;
+  const pct = Math.min(100, Math.round((done/goal)*100));
+  const remaining = Math.max(0, goal-done);
+  const dayNames = ['L','M','X','J','V','S','D'];
+  const dayDots = dayNames.map((d,i)=>{
+    const dd = new Date(ws); dd.setDate(ws.getDate()+i);
+    const dateStr = dd.toISOString().split('T')[0];
+    let cls='wg-day';
+    if(weekDates.includes(dateStr)) cls+=' done';
+    else if(i===diffToMonday) cls+=' today';
+    return `<div class="${cls}">${d}</div>`;
+  }).join('');
+  const text = done>=goal ? '¡Meta semanal conseguida! 🎉' : remaining===1 ? '¡1 día más y lo consigues!' : `Faltan ${remaining} días`;
+  document.getElementById('wgCount').textContent = `${done}/${goal}`;
+  document.getElementById('wgText').textContent = text;
+  const fill = document.getElementById('wgBarFill');
+  fill.style.width = pct+'%';
+  fill.style.background = done>=goal ? 'linear-gradient(135deg,#22c55e,#4ade80)' : 'linear-gradient(135deg,var(--p1),var(--coral))';
+  document.getElementById('wgDays').innerHTML = dayDots;
+}
+
 // ── SETTINGS ──
 function initSettings(){
   document.getElementById('sName').value=CU.name; document.getElementById('sTheme').value=CU.theme; document.getElementById('sShowTimers').checked=CU.showTimers;
   const user = DB.getUsers().find(u=>u.id===CU.id);
-  document.getElementById('sSex').value=user.sex||''; document.getElementById('sAge').value=user.age||''; document.getElementById('sHeight').value=user.height||''; document.getElementById('sWeight').value=user.weight||'';
+  document.getElementById('sSex').value=user.sex||''; document.getElementById('sAge').value=user.age||''; document.getElementById('sHeight').value=user.height||''; document.getElementById('sWeight').value=user.weight||''; document.getElementById('sWeekGoal').value=user.weekGoal||'';
   updateHealthUI();
 }
 function saveSettings(){
   CU.name=document.getElementById('sName').value; CU.theme=document.getElementById('sTheme').value; CU.showTimers=document.getElementById('sShowTimers').checked;
   const u=DB.getUsers(); const i=u.findIndex(x=>x.id===CU.id);
-  u[i]={...u[i],...CU,sex:document.getElementById('sSex').value,age:document.getElementById('sAge').value,height:document.getElementById('sHeight').value,weight:document.getElementById('sWeight').value};
+  u[i]={...u[i],...CU,sex:document.getElementById('sSex').value,age:document.getElementById('sAge').value,height:document.getElementById('sHeight').value,weight:document.getElementById('sWeight').value,weekGoal:parseInt(document.getElementById('sWeekGoal').value)||0};
   DB.setUsers(u); alert("Guardado"); location.reload();
 }
 function updateHealthUI(){

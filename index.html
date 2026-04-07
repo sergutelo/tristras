@@ -81,10 +81,11 @@
     </div>
     <div class="nav-right">
       <div id="navTimer" style="display:none;font-size:.8rem;font-weight:800;color:var(--p2);background:var(--nav-btn-bg);padding:4px 10px;border-radius:12px;margin-right:8px;font-family:monospace;border:1px solid rgba(168,85,247,.3)">00:00:00</div>
-      <button class="ntab" onclick="toggleTheme()" id="btn-theme-toggle" style="padding:4px 8px;font-size:1rem;background:transparent">🌓</button>
-      <div class="avatar" id="navAvatar"></div>
-      <span id="navName"></span>
-      <button class="btn-logout" onclick="logout()">Salir</button>
+      <div class="nav-btn-group">
+        <button id="btn-theme-toggle" onclick="toggleTheme()" title="Cambiar tema">🌓</button>
+        <span class="nbg-sep"></span>
+        <button onclick="logout()" title="Cerrar sesión">↩ Salir</button>
+      </div>
     </div>
   </nav>
 
@@ -116,6 +117,15 @@
       <div class="stat-card"><div class="stat-icon">🏆</div><div class="stat-val" id="s-best-streak">0</div><div class="stat-lbl">Mejor racha</div></div>
       <div class="stat-card"><div class="stat-icon">📊</div><div class="stat-val" id="s-consist">0%</div><div class="stat-lbl">Constancia 90d</div></div>
       <div class="stat-card"><div class="stat-icon">🏃</div><div class="stat-val" id="s-km">0</div><div class="stat-lbl">Récord Distancia</div></div>
+    </div>
+    <!-- WEEKLY GOAL -->
+    <div class="card" id="weekGoalCard" style="display:none;padding:18px 22px">
+      <div class="between">
+        <div><h3>🎯 Objetivo semanal</h3><p class="sub mt4" id="wgText"></p></div>
+        <div id="wgCount" style="font-size:2rem;font-weight:800;background:linear-gradient(135deg,var(--p2),var(--coral));background-clip:text;-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1"></div>
+      </div>
+      <div class="wg-bar-wrap"><div class="wg-bar-fill" id="wgBarFill" style="width:0%"></div></div>
+      <div class="wg-days" id="wgDays"></div>
     </div>
     <div class="card">
       <h3>📈 Sesiones por semana (últimas 8)</h3>
@@ -255,6 +265,10 @@
         </div>
         <input type="checkbox" id="sShowTimers" style="width:24px;height:24px;cursor:pointer">
       </div>
+      <div class="fg mt14">
+        <label>🎯 Objetivo semanal (días/semana · 0 = sin objetivo)</label>
+        <input id="sWeekGoal" type="number" min="0" max="7" placeholder="Ej: 3">
+      </div>
       <button class="btn btn-p mt14" onclick="saveSettings()">Guardar cambios</button>
     </div>
 
@@ -309,6 +323,33 @@
   <button class="mnav-btn" id="mn-log" onclick="showTab('log')"><span class="micon">➕</span>Entreno</button>
   <button class="mnav-btn" id="mn-history" onclick="showTab('history')"><span class="micon">📅</span>Historial</button>
   <button class="mnav-btn" id="mn-settings" onclick="showTab('settings')"><span class="micon">⚙️</span>Ajustes</button>
+</div>
+
+
+<!-- ══ POST-WORKOUT MODAL ══ -->
+<div id="postWorkoutModal" class="pw-overlay" style="display:none" onclick="if(event.target===this)closePostWorkout()">
+  <div class="pw-modal">
+    <div class="pw-header">
+      <div class="pw-big-emoji" id="pwBigEmoji">💪</div>
+      <h2 id="pwTitle">¡Entreno guardado!</h2>
+      <p class="sub mt4" id="pwSub">Sigue así 💫</p>
+    </div>
+    <div id="pwPRSection" class="pw-pr-section" style="display:none">
+      <div class="pw-divider-label">🏆 Récords superados</div>
+      <div id="pwPRList" class="pw-pr-grid"></div>
+    </div>
+    <div class="pw-mood-section">
+      <div class="pw-divider-label">¿Cómo te has sentido hoy?</div>
+      <div class="pw-mood-row">
+        <button class="pw-mb" data-mood="1" onclick="selectMood(1)"><span class="pw-moji">😴</span><span class="pw-ml">Agotado</span></button>
+        <button class="pw-mb" data-mood="2" onclick="selectMood(2)"><span class="pw-moji">😐</span><span class="pw-ml">Normal</span></button>
+        <button class="pw-mb" data-mood="3" onclick="selectMood(3)"><span class="pw-moji">🙂</span><span class="pw-ml">Bien</span></button>
+        <button class="pw-mb" data-mood="4" onclick="selectMood(4)"><span class="pw-moji">💪</span><span class="pw-ml">Fuerte</span></button>
+        <button class="pw-mb" data-mood="5" onclick="selectMood(5)"><span class="pw-moji">🔥</span><span class="pw-ml">¡Brutal!</span></button>
+      </div>
+    </div>
+    <button class="btn btn-p btn-full" style="margin-top:8px" onclick="closePostWorkout()">Al Dashboard →</button>
+  </div>
 </div>
 
 <script src="app.js"></script>

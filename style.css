@@ -80,13 +80,15 @@ nav{display:flex;align-items:center;justify-content:space-between;padding:14px 2
   border-radius:8px;cursor:pointer;font-size:.82rem;font-weight:600;transition:.2s;font-family:inherit}
 .ntab.act,.ntab:hover{background:var(--p1);color:#fff}
 .nav-right{display:flex;align-items:center;gap:10px}
-.avatar{width:34px;height:34px;border-radius:50%;
-  background:linear-gradient(135deg,var(--p1),var(--coral));
-  display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.95rem;color:#fff}
-#navName{font-size:.85rem;font-weight:600;color:var(--nav-text)}
-.btn-logout{background:var(--btn-logout-bg);border:1px solid var(--border);
-  color:var(--nav-text);padding:6px 12px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;font-family:inherit;transition:.2s}
-.btn-logout:hover{background:var(--red);color:#fff;border-color:var(--red)}
+/* ── Segmented button group (theme + logout) ── */
+.nav-btn-group{display:flex;align-items:center;background:var(--nav-btn-bg);
+  border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.nav-btn-group button{background:none;border:none;color:var(--nav-text);
+  padding:7px 13px;cursor:pointer;font-size:.78rem;font-weight:600;
+  font-family:inherit;transition:background .15s,color .15s;white-space:nowrap}
+.nav-btn-group button:hover{background:var(--nav-btn-hover);color:#fff}
+#btn-theme-toggle{font-size:1.05rem;padding:6px 11px}
+.nbg-sep{width:1px;height:22px;background:var(--border);flex-shrink:0}
 
 /* ── TABS CONTENT ── */
 .tcont{display:none;padding:24px;max-width:1000px;margin:0 auto;animation:fadeUp .3s ease}
@@ -294,3 +296,56 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
   .sets-header,.set-row{grid-template-columns:30px 1fr 1fr 1fr;gap:4px;font-size:0.8rem}
   .ot-grid .sets-header,.ot-grid .set-row{grid-template-columns:30px 1fr 1fr 1fr}
 }
+
+/* ── POST-WORKOUT MODAL ── */
+.pw-overlay{position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.78);
+  backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;padding:20px}
+.pw-modal{background:var(--card);border:1px solid var(--border);border-radius:26px;
+  padding:32px 28px;max-width:420px;width:100%;text-align:center;
+  box-shadow:0 32px 80px rgba(0,0,0,.6),0 0 0 1px rgba(168,85,247,.15);
+  animation:pwPop .45s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pwPop{from{opacity:0;transform:scale(.72) translateY(28px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.pw-big-emoji{font-size:4rem;line-height:1;margin-bottom:10px;display:inline-block;
+  animation:pwBounce .65s cubic-bezier(.34,1.56,.64,1)}
+@keyframes pwBounce{0%{transform:scale(0) rotate(-12deg)}65%{transform:scale(1.18) rotate(5deg)}100%{transform:scale(1) rotate(0)}}
+.pw-header h2{font-size:1.4rem;font-weight:800}
+.pw-divider-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.9px;
+  color:var(--muted);margin:20px 0 12px;border-top:1px solid var(--border);padding-top:16px}
+.pw-pr-grid{display:flex;flex-direction:column;gap:8px;text-align:left}
+.pw-pr-chip{background:linear-gradient(135deg,rgba(249,115,22,.12),rgba(251,146,60,.06));
+  border:1px solid rgba(249,115,22,.45);border-radius:12px;padding:10px 14px;
+  font-size:.82rem;font-weight:700;color:var(--coral);
+  display:flex;align-items:center;gap:8px;
+  animation:pwPulse 2.2s ease infinite}
+.pw-pr-chip:nth-child(2){animation-delay:.4s}.pw-pr-chip:nth-child(3){animation-delay:.8s}
+@keyframes pwPulse{0%,100%{box-shadow:0 0 0 0 rgba(249,115,22,.4)}50%{box-shadow:0 0 0 7px rgba(249,115,22,0)}}
+.pw-pr-chip strong{margin-left:auto;background:rgba(249,115,22,.25);color:#fff;padding:2px 9px;border-radius:6px}
+.pw-mood-row{display:flex;justify-content:center;gap:6px}
+.pw-mb{background:var(--card2);border:2px solid var(--border);border-radius:14px;
+  padding:10px 4px;cursor:pointer;transition:all .18s;display:flex;flex-direction:column;
+  align-items:center;gap:5px;flex:1;max-width:68px;font-family:inherit}
+.pw-mb:hover{transform:scale(1.1);border-color:var(--p2)}
+.pw-mb.sel{border-color:var(--p2);background:rgba(168,85,247,.2);transform:scale(1.1);
+  box-shadow:0 0 0 4px rgba(168,85,247,.22)}
+.pw-moji{font-size:1.65rem;line-height:1}
+.pw-ml{font-size:.58rem;color:var(--muted);font-weight:600;white-space:nowrap}
+/* Mood badge in history/recent */
+.mood-badge{font-size:1.15rem;line-height:1;cursor:default}
+/* Confetti */
+@keyframes confettiFall{
+  0%{transform:translateY(-10px) rotate(0deg);opacity:1}
+  100%{transform:translateY(105vh) rotate(760deg);opacity:0}}
+
+/* ── WEEKLY GOAL ── */
+.wg-bar-wrap{background:var(--card2);border-radius:20px;height:8px;margin:12px 0;overflow:hidden}
+.wg-bar-fill{height:100%;border-radius:20px;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.wg-days{display:flex;gap:5px;margin-top:10px}
+.wg-day{flex:1;text-align:center;font-size:.65rem;font-weight:700;color:var(--muted);
+  padding:6px 2px;border-radius:8px;border:1px solid var(--border);transition:.2s}
+.wg-day.done{background:linear-gradient(135deg,var(--p1),var(--p2));color:#fff;border-color:transparent}
+.wg-day.today{border-color:var(--coral);color:var(--coral);font-weight:800}
+/* ── REPEAT BUTTON ── */
+.repeat-btn{background:none;border:1px solid var(--border);color:var(--muted);
+  padding:3px 9px;border-radius:8px;cursor:pointer;font-size:.68rem;font-weight:700;
+  font-family:inherit;transition:.2s;margin-left:auto;white-space:nowrap}
+.repeat-btn:hover{border-color:var(--p2);color:var(--p2);background:rgba(168,85,247,.1)}
