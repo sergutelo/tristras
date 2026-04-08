@@ -538,7 +538,7 @@ function initLog(){
     </div>
   `).join('');
   document.getElementById('wDate').valueAsDate = new Date();
-  document.getElementById('wDur').value = ''; document.getElementById('wNotes').value = '';
+  document.getElementById('wDur').value = '';
   selProg('1a');
 }
 
@@ -558,7 +558,7 @@ function goStep2(){
   currentWorkout.sessionName = (PROGRAMS[k]?.s || [])[0] || 'Sesión única';
   currentWorkout.date = document.getElementById('wDate').value;
   currentWorkout.duration = parseInt(document.getElementById('wDur').value)||20;
-  currentWorkout.notes = document.getElementById('wNotes').value;
+  currentWorkout.notes = currentWorkout.notes || '';
   if(!currentWorkout.date) return alert("Selecciona fecha");
   document.getElementById('log-step1').style.display='none';
   document.getElementById('log-step2').style.display='block';
@@ -785,7 +785,6 @@ function initLogForEdit(){
   // Fill step1 form with saved values
   document.getElementById('wDate').value = currentWorkout.date;
   document.getElementById('wDur').value = currentWorkout.duration;
-  document.getElementById('wNotes').value = currentWorkout.notes || '';
 }
 function cancelEdit(){ const wasRepeat=repeatMode; editIdx=-1; repeatMode=false; showTab(wasRepeat?'dashboard':'history'); }
 function fillEditData(){
@@ -832,7 +831,6 @@ function initLogForRepeat(){
   if(document.getElementById('pc-'+k)) document.getElementById('pc-'+k).classList.add('sel');
   document.getElementById('wDate').valueAsDate = new Date();
   document.getElementById('wDur').value = currentWorkout.duration || '';
-  document.getElementById('wNotes').value = '';
 }
 
 function drawWeeklyGoal(sessions){
