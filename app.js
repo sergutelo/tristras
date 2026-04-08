@@ -872,13 +872,14 @@ function drawWeeklyGoal(sessions){
 function initSettings(){
   document.getElementById('sName').value=CU.name; document.getElementById('sTheme').value=CU.theme; document.getElementById('sShowTimers').checked=CU.showTimers;
   const user = DB.getUsers().find(u=>u.id===CU.id);
-  document.getElementById('sSex').value=user.sex||''; document.getElementById('sAge').value=user.age||''; document.getElementById('sHeight').value=user.height||''; document.getElementById('sWeight').value=user.weight||''; document.getElementById('sWeekGoal').value=user.weekGoal||'';
+  document.getElementById('sSex').value=user.sex||''; document.getElementById('sAge').value=user.age||''; document.getElementById('sHeight').value=user.height||''; document.getElementById('sWeight').value=user.weight||'';
+  const wgEl=document.getElementById('sWeekGoal'); if(wgEl) wgEl.value=user.weekGoal||'';
   updateHealthUI();
 }
 function saveSettings(){
   CU.name=document.getElementById('sName').value; CU.theme=document.getElementById('sTheme').value; CU.showTimers=document.getElementById('sShowTimers').checked;
   const u=DB.getUsers(); const i=u.findIndex(x=>x.id===CU.id);
-  u[i]={...u[i],...CU,sex:document.getElementById('sSex').value,age:document.getElementById('sAge').value,height:document.getElementById('sHeight').value,weight:document.getElementById('sWeight').value,weekGoal:parseInt(document.getElementById('sWeekGoal').value)||0};
+  u[i]={...u[i],...CU,sex:document.getElementById('sSex').value,age:document.getElementById('sAge').value,height:document.getElementById('sHeight').value,weight:document.getElementById('sWeight').value,weekGoal:parseInt(document.getElementById('sWeekGoal')?.value||'0')||0};
   DB.setUsers(u); alert("Guardado"); location.reload();
 }
 function updateHealthUI(){
