@@ -30,7 +30,10 @@ const DB = {
   getUsers: () => JSON.parse(localStorage.getItem('tt_users')||'[]'),
   setUsers: (u) => localStorage.setItem('tt_users', JSON.stringify(u)),
   data: (id) => JSON.parse(localStorage.getItem('tt_data_'+id)||(id==='Cuerposserranos'?'{"sessions":[]}':'{"sessions":[]}')),
-  save: (id, d) => localStorage.setItem('tt_data_'+id, JSON.stringify(d))
+  save: (id, d) => localStorage.setItem('tt_data_'+id, JSON.stringify(d)),
+  // ── Planning (independent key, never exported) ──
+  planData: (id) => JSON.parse(localStorage.getItem('tt_plan_'+id)||'{"plans":[]}'),
+  savePlan: (id, d) => localStorage.setItem('tt_plan_'+id, JSON.stringify(d))
 };
 
 // ── CATÁLOGO OFICIAL CUERPOS SERRANOS ──
@@ -131,6 +134,8 @@ const MOOD_LABELS = ['','Agotado','Normal','Bien','Fuerte','¡Brutal!'];
 
 // ── APP STATE ──
 let hmDate = new Date();
+let hmMode = 'history';  // 'history' | 'plan'
+let planPickerDate = null; // ISO string of day being planned
 let currentWorkout = null;
 let editIdx = -1;
 let calPeriod = 'week';
@@ -325,10 +330,26 @@ function navHeatmap(dir) {
   drawMonthlyHeatmap();
 }
 
+function setHmMode(mode) {
+  hmMode = mode;
+  document.getElementById('hmBtnHistory').classList.toggle('act', mode === 'history');
+  document.getElementById('hmBtnPlan').classList.toggle('act', mode === 'plan');
+  drawMonthlyHeatmap();
+}
+
 function drawMonthlyHeatmap() {
+  if (hmMode === 'plan') drawPlanHeatmap();
+  else drawHistoryHeatmap();
+}
+
+// ── HISTORY HEATMAP (original) ──
+function drawHistoryHeatmap() {
   const container = document.getElementById('hmGrid');
-  const monthLab = document.getElementById('hmMonth');
+  const monthLab  = document.getElementById('hmMonth');
+  const titleEl   = document.getElementById('hmTitle');
+  const legend    = document.getElementById('hmLegend');
   if (!container) return;
+  if (titleEl) titleEl.textContent = '📅 Actividad';
   const sessions = DB.data(CU.id).sessions || [];
   const year = hmDate.getFullYear();
   const month = hmDate.getMonth();
@@ -369,6 +390,112 @@ function drawMonthlyHeatmap() {
     el.onclick = () => { if(data) alert(`Día ${d}: ${tip}`); };
     container.appendChild(el);
   }
+  // Legend
+  if (legend) legend.innerHTML = `
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--card2);border:1px solid var(--border)"></span>Sin entreno</span>
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:rgba(124,58,237,.15)"></span>1-4 ej.</span>
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:rgba(124,58,237,.4)"></span>5-8 ej.</span>
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:rgba(124,58,237,.7)"></span>9-12 ej.</span>
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--p2)"></span>+12 ej.</span>`;
+}
+
+// ── PLANNING HEATMAP ──
+function drawPlanHeatmap() {
+  const container = document.getElementById('hmGrid');
+  const monthLab  = document.getElementById('hmMonth');
+  const titleEl   = document.getElementById('hmTitle');
+  const legend    = document.getElementById('hmLegend');
+  if (!container) return;
+  if (titleEl) titleEl.textContent = '🗓️ Planificación';
+  const plans = DB.planData(CU.id).plans || [];
+  const year  = hmDate.getFullYear();
+  const month = hmDate.getMonth();
+  const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  monthLab.textContent = `${monthNames[month]} ${year}`;
+  const firstDay    = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const startOffset = (firstDay === 0 ? 6 : firstDay - 1);
+  container.innerHTML = '';
+  const dayNames = ['L','M','X','J','V','S','D'];
+  dayNames.forEach(d => container.innerHTML += `<div style="text-align:center;font-size:0.6rem;color:var(--muted);font-weight:800;padding-bottom:5px">${d}</div>`);
+  for (let i = 0; i < startOffset; i++) container.innerHTML += '<div></div>';
+  // Index plans for this month
+  const planMap = {};
+  plans.forEach(p => {
+    const pd = new Date(p.date + 'T00:00:00');
+    if (pd.getFullYear() === year && pd.getMonth() === month) planMap[pd.getDate()] = p;
+  });
+  const today     = new Date(); today.setHours(0,0,0,0);
+  const isThisMonth = today.getFullYear() === year && today.getMonth() === month;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const plan   = planMap[d];
+    const cellDate = new Date(year, month, d);
+    const isPast   = cellDate < today;
+    const isToday  = isThisMonth && d === today.getDate();
+    let cls = 'hm-day';
+    let tip = '';
+    if (plan) {
+      cls += ' planned';
+      const prog = PROGRAMS[plan.program];
+      tip = `${prog?.e || ''} ${prog?.n || plan.program}`;
+    }
+    if (isPast && !isToday) cls += ' plan-past';
+    if (isToday) cls += ' today';
+    const el = document.createElement('div');
+    el.className = cls;
+    el.textContent = d;
+    if (tip) el.setAttribute('data-tip', tip);
+    // Only allow editing today or future days
+    if (!isPast || isToday) {
+      el.onclick = () => openPlanModal(year, month, d, plan || null);
+    }
+    container.appendChild(el);
+  }
+  if (legend) legend.innerHTML = `
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:var(--card2);border:1px solid var(--border)"></span>Sin plan</span>
+    <span class="hm-legend-item"><span class="hm-legend-swatch" style="background:rgba(249,115,22,.5);border:1px solid var(--coral)"></span>Planificado</span>`;
+}
+
+// ── PLAN MODAL ──
+function openPlanModal(year, month, day, existingPlan) {
+  planPickerDate = `${year}-${String(month+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+  const monthNames = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+  document.getElementById('planModalTitle').textContent = `🗓️ ${day} de ${monthNames[month]}`;
+  // Build program buttons
+  const grid = document.getElementById('planProgGrid');
+  grid.innerHTML = Object.entries(PROGRAMS).map(([k, v]) => {
+    const isSel = existingPlan && existingPlan.program === k;
+    return `<button class="plan-prog-btn${isSel?' sel':''}" onclick="savePlan('${k}')">
+      <span class="ppe">${v.e}</span><span>${v.n.split(' - ')[0] || k.toUpperCase()}</span>
+    </button>`;
+  }).join('');
+  // Show delete btn only if plan already exists
+  const delBtn = document.getElementById('planDeleteBtn');
+  delBtn.style.display = existingPlan ? 'block' : 'none';
+  document.getElementById('planModal').style.display = 'flex';
+}
+
+function savePlan(programKey) {
+  const d = DB.planData(CU.id);
+  // Remove if same date already exists, then add new
+  d.plans = d.plans.filter(p => p.date !== planPickerDate);
+  d.plans.push({ date: planPickerDate, program: programKey });
+  DB.savePlan(CU.id, d);
+  closePlanModal();
+  drawPlanHeatmap();
+}
+
+function deletePlan() {
+  const d = DB.planData(CU.id);
+  d.plans = d.plans.filter(p => p.date !== planPickerDate);
+  DB.savePlan(CU.id, d);
+  closePlanModal();
+  drawPlanHeatmap();
+}
+
+function closePlanModal() {
+  document.getElementById('planModal').style.display = 'none';
+  planPickerDate = null;
 }
 
 // ── CHARTS ──

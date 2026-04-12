@@ -349,3 +349,68 @@ label{font-size:.78rem;color:var(--muted);margin-bottom:6px;display:block;font-w
   padding:3px 9px;border-radius:8px;cursor:pointer;font-size:.68rem;font-weight:700;
   font-family:inherit;transition:.2s;margin-left:auto;white-space:nowrap}
 .repeat-btn:hover{border-color:var(--p2);color:var(--p2);background:rgba(168,85,247,.1)}
+
+/* ── HEATMAP TOGGLE (Historial / Planificación) ── */
+.hm-toggle{display:flex;background:var(--card2);border:1px solid var(--border);border-radius:10px;overflow:hidden;gap:0}
+.hm-tog-btn{background:none;border:none;color:var(--muted);padding:6px 10px;font-size:.68rem;font-weight:700;
+  font-family:inherit;cursor:pointer;transition:all .2s;white-space:nowrap}
+.hm-tog-btn.act{background:linear-gradient(135deg,var(--p1),var(--p2));color:#fff}
+
+/* ── HEATMAP LEGEND ── */
+.hm-legend{display:flex;align-items:center;gap:6px;margin-top:10px;flex-wrap:wrap;justify-content:flex-end}
+.hm-legend-item{display:flex;align-items:center;gap:4px;font-size:.6rem;color:var(--muted);font-weight:600}
+.hm-legend-swatch{width:12px;height:12px;border-radius:3px}
+
+/* ── HEATMAP PLANNING DAY ── */
+.hm-day.planned{
+  background:rgba(249,115,22,.12);
+  border-color:rgba(249,115,22,.4);
+  color:var(--coral);
+}
+.hm-day.planned::before{
+  content:'';position:absolute;top:3px;right:3px;
+  width:5px;height:5px;background:var(--coral);border-radius:50%;
+}
+.hm-day.plan-past{
+  opacity:0.45;
+  cursor:default;
+}
+.hm-day.plan-past:hover{transform:none;border-color:var(--border)}
+
+/* ── PLAN PICKER MODAL (bottom sheet) ── */
+.plan-overlay{
+  position:fixed;inset:0;z-index:2000;
+  background:rgba(0,0,0,.65);backdrop-filter:blur(8px);
+  display:flex;align-items:flex-end;justify-content:center;
+  animation:fadeIn .2s ease;
+}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.plan-sheet{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:24px 24px 0 0;
+  padding:20px 22px 32px;
+  width:100%;max-width:520px;
+  animation:sheetUp .3s cubic-bezier(.34,1.2,.64,1);
+  max-height:85vh;overflow-y:auto;
+}
+@keyframes sheetUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+
+.plan-sheet-handle{width:44px;height:4px;background:var(--border);border-radius:4px;
+  margin:0 auto 16px;flex-shrink:0}
+.plan-sheet-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.plan-close{background:none;border:none;color:var(--muted);font-size:1.1rem;cursor:pointer;
+  padding:4px 8px;border-radius:6px;transition:.2s;font-family:inherit}
+.plan-close:hover{background:var(--card2);color:var(--text)}
+
+.plan-prog-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.plan-prog-btn{
+  background:var(--card2);border:2px solid var(--border);border-radius:12px;
+  padding:12px 6px;cursor:pointer;font-family:inherit;font-size:.72rem;font-weight:700;
+  color:var(--text);text-align:center;transition:all .2s;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+}
+.plan-prog-btn:hover{border-color:var(--coral);background:rgba(249,115,22,.08);color:var(--coral)}
+.plan-prog-btn.sel{border-color:var(--coral);background:rgba(249,115,22,.15);color:var(--coral);
+  box-shadow:0 4px 12px rgba(249,115,22,.25)}
+.plan-prog-btn .ppe{font-size:1.5rem;line-height:1}

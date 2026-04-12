@@ -97,16 +97,24 @@
     <div class="card" id="heatmapCard">
       <div class="hm-header">
         <div>
-          <h3>📅 Calendario de actividad</h3>
+          <h3 id="hmTitle">📅 Actividad</h3>
           <p id="hmMonth" class="sub" style="font-size:.75rem"></p>
         </div>
-        <div class="hm-nav">
-          <button class="hm-btn" onclick="navHeatmap(-1)" title="Mes anterior">←</button>
-          <button class="hm-btn" onclick="navHeatmap(0)" title="Mes actual">⬤</button>
-          <button class="hm-btn" onclick="navHeatmap(1)" title="Mes siguiente">→</button>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="hm-toggle" id="hmToggle">
+            <button class="hm-tog-btn act" id="hmBtnHistory" onclick="setHmMode('history')">Historial</button>
+            <button class="hm-tog-btn" id="hmBtnPlan" onclick="setHmMode('plan')">Planificación</button>
+          </div>
+          <div class="hm-nav">
+            <button class="hm-btn" onclick="navHeatmap(-1)" title="Mes anterior">←</button>
+            <button class="hm-btn" onclick="navHeatmap(0)" title="Mes actual">⬤</button>
+            <button class="hm-btn" onclick="navHeatmap(1)" title="Mes siguiente">→</button>
+          </div>
         </div>
       </div>
       <div id="hmGrid" class="hm-grid"></div>
+      <!-- Legend -->
+      <div id="hmLegend" class="hm-legend"></div>
     </div>
     <div class="stat-grid">
       <div class="stat-card"><div class="stat-icon">🔥</div><div class="stat-val" id="s-streak">0</div><div class="stat-lbl">Racha actual</div></div>
@@ -348,6 +356,20 @@
       </div>
     </div>
     <button class="btn btn-p btn-full" style="margin-top:8px" onclick="closePostWorkout()">Al Dashboard →</button>
+  </div>
+</div>
+
+<!-- ══ PLAN PICKER MODAL ══ -->
+<div id="planModal" class="plan-overlay" style="display:none" onclick="if(event.target===this)closePlanModal()">
+  <div class="plan-sheet">
+    <div class="plan-sheet-handle"></div>
+    <div class="plan-sheet-header">
+      <h3 id="planModalTitle">📅 Planificar día</h3>
+      <button class="plan-close" onclick="closePlanModal()">✕</button>
+    </div>
+    <p class="sub" style="margin-bottom:14px;font-size:.8rem">Elige el programa que tienes pensado hacer:</p>
+    <div class="plan-prog-grid" id="planProgGrid"></div>
+    <button class="btn btn-red btn-full" id="planDeleteBtn" style="margin-top:10px;display:none" onclick="deletePlan()">🗑️ Quitar planificación</button>
   </div>
 </div>
 
