@@ -256,7 +256,10 @@ function showTab(t){
   if(t==='log') { if(editIdx>=0) initLogForEdit(); else if(repeatMode) initLogForRepeat(); else initLog(); }
   if(t==='history') drawHistory();
   if(t==='settings') initSettings();
-  window.scrollTo(0,0);
+  // Scroll to top — compatible with all mobile browsers and iOS PWA
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
 }
 
 // ── DASHBOARD ──
