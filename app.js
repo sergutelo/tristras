@@ -692,6 +692,10 @@ function goStep2(){
   if(!currentWorkout.date) return alert("Selecciona fecha");
   document.getElementById('log-step1').style.display='none';
   document.getElementById('log-step2').style.display='block';
+  // Scroll al inicio para ver los ejercicios desde el primero
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
   document.getElementById('step2Title').textContent = PROGRAMS[k].n;
   document.getElementById('step2Sub').textContent = currentWorkout.sessionName + ' · ' + currentWorkout.date;
   document.getElementById('timerPanel').style.display = CU.showTimers ? 'flex' : 'none';
@@ -739,7 +743,13 @@ function addSet(bi,ei,data=null){
   c.appendChild(row);
 }
 
-function goStep1(){ document.getElementById('log-step2').style.display='none'; document.getElementById('log-step1').style.display='block'; }
+function goStep1(){
+  document.getElementById('log-step2').style.display='none';
+  document.getElementById('log-step1').style.display='block';
+  window.scrollTo({ top: 0, left: 0, behavior: 'instant' });
+  document.documentElement.scrollTop = 0;
+  document.body.scrollTop = 0;
+}
 
 function saveWorkout(){
   const exs = [];
