@@ -1,7 +1,7 @@
 # 💪 TrisTras Tracker — Manual de Usuario
 
 > **Tu app de registro de entrenamientos de Cuerpos Serranos**  
-> Versión 1.3 · Aplicación web progresiva (PWA) · Funciona sin conexión
+> Versión 4.2 · Aplicación web progresiva (PWA) · Funciona sin conexión
 
 ---
 
@@ -419,4 +419,4 @@ En móvil, las pestañas aparecen en la **barra inferior** para que sean fácile
 ---
 
 *Manual realizado para la comunidad Cuerpos Serranos 💪*  
-*TrisTras Tracker v1.3*
+*TrisTras Tracker v4.2*
