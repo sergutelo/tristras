@@ -179,6 +179,8 @@ function login(id){
     CU.id=id; document.getElementById('pinUser').textContent=u.name;
     document.getElementById('lm-select').style.display='none';
     document.getElementById('lm-pin').style.display='block';
+    applyTheme(u.theme || 'dark');
+    applyColor(u.color || 'default');
     document.getElementById('pinInput').value='';
     setTimeout(()=>document.getElementById('pinInput').focus(),100);
   } else {
