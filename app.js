@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   TrisTras — App Logic (v1.3.0) — PRODUCTO REAL CUERPOS SERRANOS
+   TrisTras — App Logic (v4.2.0) — PRODUCTO REAL CUERPOS SERRANOS
    ══════════════════════════════════════════════════════════════════ */
 
 // ── PWA UPDATE SYSTEM ──
