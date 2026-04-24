@@ -1081,3 +1081,34 @@ function importData(e){
   r.readAsText(f);
 }
 function resetData(){ if(confirm("¿BORRAR TODO?")) { DB.save(CU.id,{sessions:[]}); location.reload(); } }
+
+// ── SWIPE NAVIGATION ──
+let touchStartX = 0; let touchStartY = 0;
+document.addEventListener('touchstart', e => {
+  touchStartX = e.changedTouches[0].screenX;
+  touchStartY = e.changedTouches[0].screenY;
+}, {passive: true});
+
+document.addEventListener('touchend', e => {
+  const appScreen = document.getElementById('appScreen');
+  if (!appScreen || appScreen.style.display === 'none') return;
+  const diffX = e.changedTouches[0].screenX - touchStartX;
+  const diffY = e.changedTouches[0].screenY - touchStartY;
+  
+  if (Math.abs(diffY) > Math.abs(diffX) || Math.abs(diffX) < 70) return;
+
+  const visTab = document.querySelector('.tcont.vis');
+  if(!visTab) return;
+  const currentTabId = visTab.id.replace('tab-', '');
+  const TAB_ORDER = ['dashboard', 'log', 'history', 'settings'];
+  const idx = TAB_ORDER.indexOf(currentTabId);
+  if(idx === -1) return;
+
+  const pwModal = document.getElementById('postWorkoutModal');
+  if(pwModal && pwModal.style.display === 'flex') return;
+  const step2 = document.getElementById('log-step2');
+  if(step2 && step2.style.display === 'block') return;
+
+  if (diffX < 0 && idx < TAB_ORDER.length - 1) showTab(TAB_ORDER[idx + 1]);
+  else if (diffX > 0 && idx > 0) showTab(TAB_ORDER[idx - 1]);
+});
