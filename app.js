@@ -1085,17 +1085,20 @@ function resetData(){ if(confirm("¿BORRAR TODO?")) { DB.save(CU.id,{sessions:[]
 // ── SWIPE NAVIGATION ──
 let touchStartX = 0; let touchStartY = 0;
 document.addEventListener('touchstart', e => {
-  touchStartX = e.changedTouches[0].screenX;
-  touchStartY = e.changedTouches[0].screenY;
+  touchStartX = e.touches[0].clientX;
+  touchStartY = e.touches[0].clientY;
 }, {passive: true});
 
 document.addEventListener('touchend', e => {
-  const appScreen = document.getElementById('appScreen');
-  if (!appScreen || appScreen.style.display === 'none') return;
-  const diffX = e.changedTouches[0].screenX - touchStartX;
-  const diffY = e.changedTouches[0].screenY - touchStartY;
+  const loginScreen = document.getElementById('loginScreen');
+  if (loginScreen && loginScreen.style.display !== 'none') return;
+
+  const touchEndX = e.changedTouches[0].clientX;
+  const touchEndY = e.changedTouches[0].clientY;
+  const diffX = touchEndX - touchStartX;
+  const diffY = touchEndY - touchStartY;
   
-  if (Math.abs(diffY) > Math.abs(diffX) || Math.abs(diffX) < 70) return;
+  if (Math.abs(diffY) > Math.abs(diffX) || Math.abs(diffX) < 50) return;
 
   const visTab = document.querySelector('.tcont.vis');
   if(!visTab) return;
