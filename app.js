@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   TrisTras — App Logic (v4.4.0) — PRODUCTO REAL CUERPOS SERRANOS
+   TrisTras — App Logic (v4.5.0) — PRODUCTO REAL CUERPOS SERRANOS
    ══════════════════════════════════════════════════════════════════ */
 
 // ── PWA UPDATE SYSTEM ──
@@ -68,61 +68,61 @@ const EJERCICIOS = {
     'Aperturas de hombros con banda. "El bostezo"'
   ],
   '💛 Pack 2A': [
-    'Media sentadilla. "Pantalón vaquero"',
-    'Curl de bíceps . "Camiseta blanca"',
-    'Puente de glúteos con banda . "Kardashian con goma"',
-    'Extensión de cadera con banda . "Coz de pie"',
-    'Zancadas laterales con banda . "El Godzilla"',
-    'Jalón dorsal con banda . "La aspiradora"',
+    'Media sentadilla. "El pantalón vaquero"',
+    'Curl de bíceps. "La camiseta blanca"',
+    'Puente de glúteos con banda. "Las Kardashian con goma"',
+    'Extensión de cadera con banda. "La coz de pie"',
+    'Zancadas laterales con banda. "El Godzilla"',
+    'Jalón dorsal con banda. "La aspiradora"',
     'Puente con extensión de rodilla'
   ],
   '💛 Pack 2B': [
-    'Media sentadilla. "Pantalón vaquero"',
-    'Extensión de tríceps. "El latigazo"',
-    'Puente de glúteos con banda . "Kardashian con gomas"',
-    'Flexiones de brazos y rodillas apoyadas. "Flexión con barreños"',
-    'Rotación externa de hombros con banda . "Maldito rotador"',
-    'Patada de glúteo con banda. "Coz del borriquito"',
+    'Media sentadilla. "El pantalón vaquero"',
+    'Extensión de tríceps con banda. "El latigazo"',
+    'Puente de glúteos con banda. "Las Kardashian con goma"',
+    'Flexiones de brazos. "Flexiones con barreños"',
+    'Rotación externa de hombros con banda. "Maldito rotador"',
+    'Patada de glúteo con banda. "La coz del borriquito"',
     'Curl de bíceps con banda sentado. "El presidiario"'
   ],
   '🍊 Pack 3A': [
-    'Media sentadilla con goma o peso. "El Pantalón Vaquero"',
-    'Extensión de tríceps con banda . "El latigazo"',
-    'Zancada adelante (con peso). "Las Converse con peso"',
+    'Media sentadilla con peso. "El pantalón vaquero con peso"',
+    'Extensión de tríceps con banda. "El latigazo"',
+    'Zancada adelante con peso. "Las converse con peso"',
     'Curl de bíceps. "La camiseta blanca"',
     'Desplazamiento lateral. "Pachín, pachín, los patitos"',
-    'Extensión tríceps sentado (con peso). "Latigazo con garrafa"',
+    'Extensión de tríceps sentado. "Latigazo con garrafa"',
     'Patada de glúteo con banda. "La coz del borriquito"',
     'Under switch animal flow. "El matrix"'
   ],
   '🍊 Pack 3B': [
-    'Media sentadilla con goma o peso. "El Pantalón Vaquero"',
+    'Media sentadilla con peso. "El pantalón vaquero con peso"',
     'Extensión de tríceps con banda. "El latigazo"',
-    'Zancada adelante (con peso). "Las Converse con peso"',
+    'Zancada adelante con peso. "Las converse con peso"',
     'Curl de bíceps con banda. "La camiseta blanca"',
     'Muñecas de famosa (2x)',
     'Abducción de cadera con banda. "La almeja de pie"',
-    'Aperturas de hombros de pie (elev laterales). "El playmobil"',
-    'Peso muerto con goma. "Paquito el chocolatero"'
+    'Aperturas de hombros de pie. "El playmobil"',
+    'Peso muerto con banda. "Paquito el chocolatero"'
   ],
   '🥋 Pack 4A': [
-    'Media sentadilla con peso. "Pantalón vaquero"',
-    'Flexiones de brazos y rodillas apoyadas. "Flexión con barreños"',
-    'Peso muerto con goma. "Paquito el chocolatero"',
-    'Curl de bíceps con banda. "Camiseta blanca"',
+    'Media sentadilla con peso. "El pantalón vaquero con peso"',
+    'Flexiones de brazos. "Flexiones con barreños"',
+    'Peso muerto con banda. "Paquito el chocolatero"',
+    'Curl de bíceps con banda. "La camiseta blanca"',
     'Resistencia: Skipping, comba.. "Las trillizas del oxígeno"',
     'Puente de glúteos con elevación. "Kardashian-cabaret"',
     'Reverse Pec Deck. "Cu-cú...¡TRAS!"',
     'Zancada lateral (slider). "La mopa"'
   ],
   '🥋 Pack 4B': [
-    'Media sentadilla con Peso. "El pantalón vaquero con goma"',
+    'Media sentadilla con peso. "El pantalón vaquero con peso"',
     'Plancha horizontal isométrica. "La plancha"',
     'Curl de bíceps. "La camiseta blanca"',
-    'Flexiones de brazos y rodillas apoyadas. "Flexiones con barreños"',
-    'Jalón con Goma. "Superman"',
-    'Desplazamiento lateral en plancha con banda. "La plancha en marcha"',
-    'Press de hombro con goma sentado. "La maleta"',
+    'Flexiones de brazos. "Flexiones con barreños"',
+    'Jalón con banda. "Superman"',
+    'Desplazamiento lateral en plancha. "La plancha en marcha"',
+    'Press de hombro con banda sentado. "La maleta"',
     'Resistencia: Skipping, comba.. "Las trillizas del oxígeno"'
   ],
   '🏃 Actividad': ['Correr', 'Caminar', 'Bici', 'Natación', 'Yoga', 'Pilates', 'Otro']
@@ -131,6 +131,19 @@ const EJERCICIOS = {
 const METS = { '1a': 4.5, '1b': 4.5, '2a': 5.5, '2b': 5.5, '3a': 6.5, '3b': 6.5, '4a': 8.0, '4b': 8.0, 'ot': 7.0 };
 const MOODS = ['', '😴', '😐', '🙂', '💪', '🔥'];
 const MOOD_LABELS = ['', 'Agotado', 'Normal', 'Bien', 'Fuerte', '¡Brutal!'];
+
+function normalizeExName(name) {
+  if (!name) return "";
+  // Eliminamos mnemonicos (. "Pantalón"), limpiamos espacios y uniformamos mayúsculas
+  let n = name.split('.')[0].split('"')[0].trim();
+  n = n.replace(/\s+/g, ' '); // Un solo espacio
+  // Uniformamos variaciones comunes para agrupar (opcional, pero útil para "duplicados")
+  n = n.replace(/con banda/gi, 'con banda');
+  n = n.replace(/con goma/gi, 'con banda'); // Unificamos "goma" y "banda"
+  n = n.replace(/con peso/gi, 'con peso');
+  n = n.replace(/con Peso/gi, 'con peso');
+  return n;
+}
 
 // ── APP STATE ──
 let hmDate = new Date();
@@ -580,7 +593,7 @@ function fillExSel(sessions) {
     if (!s.exercises) return;
     s.exercises.forEach(e => {
       if (!e || !e.exercise) return;
-      let label = e.exercise.split('.')[0].split('"')[0].trim();
+      let label = normalizeExName(e.exercise);
       exLabels.add(label);
     });
   });
@@ -604,8 +617,7 @@ function drawProgress() {
     if (!s.exercises) return;
     const found = s.exercises.find(e => {
       if (!e || !e.exercise) return false;
-      let label = e.exercise.split('.')[0].split('"')[0].trim();
-      return label === exLabel;
+      return normalizeExName(e.exercise) === exLabel;
     });
     if (found && found.sets && found.sets.length > 0) {
       const maxW = Math.max(...found.sets.map(st => parseFloat(st.weight) || 0));
@@ -630,7 +642,7 @@ function drawPRs(sessions) {
     if (!s.exercises) return;
     s.exercises.forEach(ex => {
       if (!ex || !ex.exercise) return;
-      let label = ex.exercise.split('.')[0].split('"')[0].trim();
+      let label = normalizeExName(ex.exercise);
       if (!ex.sets) return;
       ex.sets.forEach(set => {
         if (isOt) {
