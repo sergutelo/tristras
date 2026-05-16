@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════════════════════════════
-   TrisTras — App Logic (v4.3.0) — PRODUCTO REAL CUERPOS SERRANOS
+   TrisTras — App Logic (v4.4.0) — PRODUCTO REAL CUERPOS SERRANOS
    ══════════════════════════════════════════════════════════════════ */
 
 // ── PWA UPDATE SYSTEM ──
@@ -576,10 +576,14 @@ function fillExSel(sessions) {
   const sel = document.getElementById('exSel');
   const exLabels = new Set();
   
-  sessions.forEach(s => s.exercises.forEach(e => {
-    let label = e.exercise.split('.')[0].split('"')[0].trim();
-    exLabels.add(label);
-  }));
+  sessions.forEach(s => {
+    if (!s.exercises) return;
+    s.exercises.forEach(e => {
+      if (!e || !e.exercise) return;
+      let label = e.exercise.split('.')[0].split('"')[0].trim();
+      exLabels.add(label);
+    });
+  });
 
   // Ordenar alfabéticamente para facilitar la búsqueda
   const sortedExs = [...exLabels].sort();
@@ -597,14 +601,19 @@ function drawProgress() {
   const sessions = DB.data(CU.id).sessions || [];
   const pts = [];
   sessions.slice().reverse().forEach(s => {
+    if (!s.exercises) return;
     const found = s.exercises.find(e => {
+      if (!e || !e.exercise) return false;
       let label = e.exercise.split('.')[0].split('"')[0].trim();
       return label === exLabel;
     });
-    if (found) {
-      const maxW = Math.max(...found.sets.map(st => st.weight || 0));
-      const maxR = Math.max(...found.sets.map(st => st.reps || 0));
-      pts.push({ x: s.date, y: maxW > 0 ? maxW : maxR });
+    if (found && found.sets && found.sets.length > 0) {
+      const maxW = Math.max(...found.sets.map(st => parseFloat(st.weight) || 0));
+      const maxR = Math.max(...found.sets.map(st => parseFloat(st.reps) || 0));
+      const finalY = maxW > 0 ? maxW : maxR;
+      if (isFinite(finalY) && finalY > 0) {
+        pts.push({ x: s.date, y: finalY });
+      }
     }
   });
   if (charts.progress) charts.progress.destroy();
@@ -618,8 +627,11 @@ function drawPRs(sessions) {
   const prKg = {}, prKm = {};
   sessions.forEach(s => {
     const isOt = s.program === 'ot';
+    if (!s.exercises) return;
     s.exercises.forEach(ex => {
+      if (!ex || !ex.exercise) return;
       let label = ex.exercise.split('.')[0].split('"')[0].trim();
+      if (!ex.sets) return;
       ex.sets.forEach(set => {
         if (isOt) {
           const km = parseFloat(set.reps) || 0;
